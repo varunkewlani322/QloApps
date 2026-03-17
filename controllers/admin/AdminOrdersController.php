@@ -499,6 +499,16 @@ class AdminOrdersControllerCore extends AdminController
                     );
                 }
 
+                if ($idHotel && !$this->lite_display) {
+                    $this->toolbar_btn['registration_form'] = array(
+                        'short' => $this->l('Registration Form'),
+                        'href' => $this->context->link->getAdminLink('AdminPdf').'&submitAction=generateRegistrationFormPDF&id_order='.$order->id,
+                        'desc' => $this->l('View registration form'),
+                        'class' => 'icon-file-text',
+                        'target' => true,
+                    );
+                }
+
                 $this->toolbar_btn['print'] = array(
                     'short' => $this->l('Print'),
                     'href' => 'javascript:window.print()',
