@@ -1,36 +1,31 @@
 <?php
 /**
- * 2007-2017 PrestaShop
- *
  * NOTICE OF LICENSE
  *
- * This source file is subject to the Open Software License (OSL 3.0)
- * that is bundled with this package in the file LICENSE.txt.
+ * This source file is subject to the Academic Free License (AFL 3.0)
+ * that is bundled with this package in the file LICENSE.md
  * It is also available through the world-wide-web at this URL:
- * http://opensource.org/licenses/osl-3.0.php
+ * https://opensource.org/licenses/afl-3.0.php
  * If you did not receive a copy of the license and are unable to
  * obtain it through the world-wide-web, please send an email
- * to license@prestashop.com so we can send you a copy immediately.
+ * to support@qloapps.com so we can send you a copy immediately.
  *
  * DISCLAIMER
  *
- * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- * versions in the future. If you wish to customize PrestaShop for your
- * needs please refer to http://www.prestashop.com for more information.
+ * Do not edit or add to this file if you wish to upgrade this module to a newer
+ * versions in the future. If you wish to customize this module for your needs
+ * please refer to https://store.webkul.com/customisation-guidelines for more information.
  *
- *  @author    PrestaShop SA <contact@prestashop.com>
- *  @copyright 2007-2017 PrestaShop SA
- *  @license   http://opensource.org/licenses/osl-3.0.php  Open Software License (OSL 3.0)
- *  International Registered Trademark & Property of PrestaShop SA
+ * @author Webkul IN
+ * @copyright Since 2010 Webkul
+ * @license https://opensource.org/licenses/afl-3.0.php Academic Free License 3.0
  */
 
-/**
- * @since 1.5
- */
 class HTMLTemplateRegistrationFormCore extends HTMLTemplate
 {
     public $order;
     public $available_in_your_account = false;
+    protected $id_hotel = 0;
 
     /**
      * @param Order $objOrder
@@ -68,6 +63,7 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         $objCustomer = new Customer((int)$this->order->id_customer);
         $objHotelBookingDetail = new HotelBookingDetail();
         $hotelBookingDetails = $objHotelBookingDetail->getBookingDataByOrderId($this->order->id);
+        $this->id_hotel = (int)HotelBookingDetail::getIdHotelByIdOrder($this->order->id);
 
         $data = array(
             'order' => $this->order,
@@ -75,6 +71,7 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
                 'guest' => $this->getGuestData($objCustomer),
                 'hotel' => $this->getHotelData($hotelBookingDetails),
                 'stay' => $this->getStayData($hotelBookingDetails),
+                'property' => $this->getPropertyData($hotelBookingDetails),
             ),
         );
 
@@ -117,6 +114,8 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         $guestEmail = $objCustomer->email;
         $guestPhone = '';
         $guestAddress = '';
+        $guestCityCountry = '';
+        $guestPostcode = '';
 
         if ($this->order->id_address_invoice
             && Validate::isLoadedObject($objGuestAddress = new Address((int)$this->order->id_address_invoice))
@@ -132,6 +131,16 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
             }
 
             $guestAddress = AddressFormat::generateAddress($objGuestAddress, array(), '<br />', ' ');
+
+            $guestPostcode = (string)$objGuestAddress->postcode;
+            $guestCityCountryParts = array();
+            if ($objGuestAddress->city) {
+                $guestCityCountryParts[] = $objGuestAddress->city;
+            }
+            if ($objGuestAddress->id_country && Validate::isLoadedObject($objCountry = new Country((int)$objGuestAddress->id_country, (int)$this->order->id_lang))) {
+                $guestCityCountryParts[] = $objCountry->name;
+            }
+            $guestCityCountry = implode(', ', array_filter($guestCityCountryParts));
         }
 
         if ($id_order_customer_guest_detail = OrderCustomerGuestDetail::isCustomerGuestBooking($this->order->id)) {
@@ -149,6 +158,8 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
             'email' => $guestEmail,
             'mobile' => $guestPhone,
             'address' => $guestAddress,
+            'city_country' => $guestCityCountry,
+            'postcode' => $guestPostcode,
         );
     }
 
@@ -165,6 +176,9 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         $hotelPhone = '';
         $checkInTime = '';
         $checkOutTime = '';
+        $hotelPolicies = '';
+        $hotelCity = '';
+        $hotelCountry = '';
 
         if (!empty($hotelBookingDetails)) {
             $hotelBookingDetail = reset($hotelBookingDetails);
@@ -173,6 +187,8 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
             $hotelPhone = $hotelBookingDetail['phone'];
             $checkInTime = $this->formatHotelTime($hotelBookingDetail['check_in_time']);
             $checkOutTime = $this->formatHotelTime($hotelBookingDetail['check_out_time']);
+            $hotelCity = $hotelBookingDetail['city'];
+            $hotelCountry = $hotelBookingDetail['country'];
         }
 
         if ($idHotel = HotelBookingDetail::getIdHotelByIdOrder($this->order->id)) {
@@ -183,12 +199,23 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
                 $hotelPhone = $objHotelBranchInformation->phone;
                 $checkInTime = $this->formatHotelTime($objHotelBranchInformation->check_in);
                 $checkOutTime = $this->formatHotelTime($objHotelBranchInformation->check_out);
+                $hotelPolicies = (string)$objHotelBranchInformation->policies;
+                $hotelCity = (string)$objHotelBranchInformation->city;
+                if ($objHotelBranchInformation->id_country && Validate::isLoadedObject($objCountry = new Country((int)$objHotelBranchInformation->id_country, (int)$this->order->id_lang))) {
+                    $hotelCountry = (string)$objCountry->name;
+                }
 
                 if ($idHotelAddress = $objHotelBranchInformation->getHotelIdAddress()) {
                     if (Validate::isLoadedObject($objHotelAddress = new Address((int)$idHotelAddress))) {
                         $objHotelAddress->firstname = $hotelName;
                         $objHotelAddress->lastname = '';
                         $hotelAddress = AddressFormat::generateAddress($objHotelAddress, array(), '<br />', ' ');
+                        if (!$hotelCity && $objHotelAddress->city) {
+                            $hotelCity = (string)$objHotelAddress->city;
+                        }
+                        if (!$hotelCountry && $objHotelAddress->id_country && Validate::isLoadedObject($objCountry = new Country((int)$objHotelAddress->id_country, (int)$this->order->id_lang))) {
+                            $hotelCountry = (string)$objCountry->name;
+                        }
                     }
                 }
             }
@@ -213,6 +240,9 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
             'phone' => $hotelPhone,
             'check_in_time' => $checkInTime,
             'check_out_time' => $checkOutTime,
+            'policies' => $hotelPolicies,
+            'city' => $hotelCity,
+            'country' => $hotelCountry,
         );
     }
 
@@ -227,8 +257,16 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         $departureDate = '';
         $roomNumbers = array();
         $roomTypes = array();
+        $adults = 0;
+        $children = 0;
+        $ratePerNight = '';
+        $arrivalDateTime = '';
+        $departureDateTime = '';
 
         if (!empty($hotelBookingDetails)) {
+            $currency = new Currency((int)$this->order->id_currency);
+            $totalRate = 0;
+            $totalRateCount = 0;
             foreach ($hotelBookingDetails as $hotelBookingDetail) {
                 if (!$arrivalDate || strtotime($hotelBookingDetail['date_from']) < strtotime($arrivalDate)) {
                     $arrivalDate = $hotelBookingDetail['date_from'];
@@ -245,15 +283,128 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
                 if (!empty($hotelBookingDetail['room_type_name'])) {
                     $roomTypes[] = $hotelBookingDetail['room_type_name'];
                 }
+
+                $adults += (int)$hotelBookingDetail['adults'];
+                $children += (int)$hotelBookingDetail['children'];
+
+                $nights = (int)HotelHelper::getNumberOfDays($hotelBookingDetail['date_from'], $hotelBookingDetail['date_to']);
+                if ($nights > 0) {
+                    $totalRate += ((float)$hotelBookingDetail['total_price_tax_incl'] / $nights);
+                    ++$totalRateCount;
+                }
+            }
+
+            if ($totalRateCount) {
+                $avgRate = $totalRate / $totalRateCount;
+                $ratePerNight = Tools::displayPrice($avgRate, $currency, false);
+            }
+
+            $firstBookingDetail = reset($hotelBookingDetails);
+            $checkInTime = isset($firstBookingDetail['check_in_time']) ? $this->formatHotelTime($firstBookingDetail['check_in_time']) : '';
+            $checkOutTime = isset($firstBookingDetail['check_out_time']) ? $this->formatHotelTime($firstBookingDetail['check_out_time']) : '';
+            $arrivalDateTime = $arrivalDate ? Tools::displayDate($arrivalDate) : '';
+            $departureDateTime = $departureDate ? Tools::displayDate($departureDate) : '';
+            if ($arrivalDateTime && $checkInTime) {
+                $arrivalDateTime .= ' '.$checkInTime;
+            }
+            if ($departureDateTime && $checkOutTime) {
+                $departureDateTime .= ' '.$checkOutTime;
             }
         }
 
         return array(
             'arrival_date' => $arrivalDate ? Tools::displayDate($arrivalDate) : '',
             'departure_date' => $departureDate ? Tools::displayDate($departureDate) : '',
+            'arrival_date_time' => $arrivalDateTime,
+            'departure_date_time' => $departureDateTime,
             'room_number' => implode(', ', array_unique($roomNumbers)),
             'room_type' => implode(', ', array_unique($roomTypes)),
+            'booking_reference' => $this->order->getUniqReference(),
+            'adults' => $adults,
+            'children' => $children,
+            'rate_per_night' => $ratePerNight,
         );
+    }
+
+    /**
+     * @param array $hotelBookingDetails
+     *
+     * @return array
+     */
+    protected function getPropertyData($hotelBookingDetails)
+    {
+        $propertyLogo = '';
+        if ($this->id_hotel) {
+            $propertyLogo = $this->getHotelLogoPath($this->id_hotel);
+        }
+        if (!$propertyLogo) {
+            $propertyLogo = (string)$this->getLogo();
+        }
+
+        $cityCountry = '';
+        if (!empty($hotelBookingDetails)) {
+            $hotelBookingDetail = reset($hotelBookingDetails);
+            $cityCountry = implode(', ', array_filter(array($hotelBookingDetail['city'], $hotelBookingDetail['country'])));
+        }
+        if (!$cityCountry) {
+            $hotelData = $this->getHotelData($hotelBookingDetails);
+            $cityCountry = implode(', ', array_filter(array($hotelData['city'], $hotelData['country'])));
+        }
+
+        $website = '';
+        if (method_exists('Tools', 'getShopDomainSsl')) {
+            $website = Tools::getShopDomainSsl(true, true);
+        } else {
+            $website = Tools::getHttpHost(true);
+        }
+        $website .= __PS_BASE_URI__;
+
+        $additionalGuestsRows = 0;
+        if (!empty($hotelBookingDetails)) {
+            $idProducts = array();
+            foreach ($hotelBookingDetails as $hotelBookingDetail) {
+                if (!empty($hotelBookingDetail['id_product'])) {
+                    $idProducts[] = (int)$hotelBookingDetail['id_product'];
+                }
+            }
+            $idProducts = array_unique($idProducts);
+            if (!empty($idProducts)) {
+                $objHotelRoomType = new HotelRoomType();
+                $roomTypes = $objHotelRoomType->getRoomTypeDetailByRoomTypeIds(implode(',', $idProducts), false);
+                if (!empty($roomTypes) && isset($roomTypes[0]['max_guests'])) {
+                    $maxGuests = (int)$roomTypes[0]['max_guests'];
+                    $additionalGuestsRows = ($maxGuests > 1) ? ($maxGuests - 1) : 0;
+                }
+            }
+        }
+
+        return array(
+            'logo_path' => $propertyLogo,
+            'city_country' => $cityCountry,
+            'website' => $website,
+            'additional_guests_rows' => (int)$additionalGuestsRows,
+        );
+    }
+
+    /**
+     * @param int $idHotel
+     *
+     * @return string
+     */
+    protected function getHotelLogoPath($idHotel)
+    {
+        if (!$idHotel) {
+            return '';
+        }
+
+        if ($cover = HotelImage::getCover((int)$idHotel)) {
+            $imgPath = rtrim(_PS_HOTEL_IMG_DIR_, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.(int)$idHotel.DIRECTORY_SEPARATOR.(int)$cover['id'].'.jpg';
+            if (file_exists($imgPath)) {
+                return $imgPath;
+            }
+        }
+
+        return '';
     }
 
     /**
@@ -270,3 +421,4 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         return date('h:i a', strtotime($hotelTime));
     }
 }
+    
