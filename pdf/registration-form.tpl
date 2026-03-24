@@ -28,7 +28,7 @@
 						{l s='GUEST REGISTRATION CARD' pdf='true'}
 					</td>
 				</tr>
-				{* <tr>
+				<tr>
 					<td width="100%" class="center">
 						{if $registration_form.property.logo_path}
 							<img src="{$registration_form.property.logo_path}" style="height:60px;" />
@@ -36,7 +36,7 @@
 							<strong>[PROPERTY LOGO]</strong>
 						{/if}
 					</td>
-				</tr> *}
+				</tr>
 				<tr>
 					<td width="100%" class="center" style="font-size: 12pt; font-weight: bold;">
 						{$registration_form.hotel.name|escape:'html':'UTF-8'}
@@ -58,14 +58,14 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='1. GUEST INFORMATION' pdf='true'}</th>
+						{* <th class="header-left">{l s='1. GUEST INFORMATION' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
 						<td class="white">
 							<strong>{l s='TITLE:' pdf='true'}</strong>
-							[ ] {l s='Mr.' pdf='true'} &nbsp; [ ] {l s='Ms.' pdf='true'} &nbsp; [ ] {l s='Dr.' pdf='true'} &nbsp; [ ] {l s='Other:' pdf='true'} ____________________
+							[ ] {l s='Mr.' pdf='true'} &nbsp; [ ] {l s='Ms.' pdf='true'} &nbsp;
 						</td>
 					</tr>
 					<tr>
@@ -88,10 +88,6 @@
 									<td width="35%" class="white">________________________</td>
 								</tr>
 								<tr>
-									<td width="25%" class="bold">{l s='Permanent Address:' pdf='true'}</td>
-									<td width="75%" class="white">{$registration_form.guest.address}</td>
-								</tr>
-								<tr>
 									<td width="25%" class="bold">{l s='City / Country:' pdf='true'}</td>
 									<td width="45%" class="white">
 										{if $registration_form.guest.city_country}
@@ -109,6 +105,10 @@
 										{/if}
 									</td>
 								</tr>
+								<tr>
+									<td width="25%" class="bold">{l s='Address:' pdf='true'}</td>
+									<td width="75%" class="white">{$registration_form.guest.address}</td>
+								</tr>
 							</table>
 						</td>
 					</tr>
@@ -124,30 +124,31 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='2. TRAVEL INFORMATION' pdf='true'}</th>
+						{* <th class="header-left">{l s='2. TRAVEL INFORMATION' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
-					<tr>
+					{* <tr>
 						<td class="white">
 							<strong>{l s='Purpose of Visit:' pdf='true'}</strong>
 							[ ] {l s='Tourism' pdf='true'} &nbsp; [ ] {l s='Business' pdf='true'} &nbsp; [ ] {l s='Leisure' pdf='true'} &nbsp; [ ] {l s='Other:' pdf='true'} ____________
 						</td>
-					</tr>
+						
+					</tr> *}
 					<tr>
 						<td class="white">
 							<table width="100%" cellpadding="4" cellspacing="0">
 								<tr>
 									<td width="25%" class="bold">{l s='Arrived From:' pdf='true'}</td>
-									<td width="35%" class="white">________________________</td>
-									<td width="20%" class="bold">{l s='Next Destination:' pdf='true'}</td>
-									<td width="20%" class="white">________________</td>
+									<td width="30%" class="white">________________________</td>
+									<td width="25%" class="bold">{l s='Next Destination:' pdf='true'}</td>
+									<td width="20%" class="white">___________________</td>
 								</tr>
 								<tr>
+									<td width="25%" class="bold">{l s='Purpose of Visit:' pdf='true'}</td>
+									<td width="30%" class="white">________________________</td>            
 									<td width="25%" class="bold">{l s='Flight / Train Number:' pdf='true'}</td>
-									<td width="35%" class="white">________________________</td>
-									<td width="20%">&nbsp;</td>
-									<td width="20%">&nbsp;</td>
+									<td width="20%" class="white">___________________</td>
 								</tr>
 							</table>
 						</td>
@@ -164,7 +165,7 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='3. BOOKING INFORMATION' pdf='true'}</th>
+						{* <th class="header-left">{l s='3. BOOKING INFORMATION' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
@@ -231,15 +232,16 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='4. IDENTIFICATION DOCUMENT' pdf='true'}</th>
+						{* <th class="header-left">{l s='4. IDENTIFICATION DOCUMENT' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
 					<tr>
 						<td class="white">
-							<strong>[ ] {l s='LOCAL GUEST' pdf='true'}</strong><br />
-							<strong>{l s='Identity Proof:' pdf='true'}</strong>
-							[ ] {l s='Aadhar' pdf='true'} &nbsp; [ ] {l s='Driving License' pdf='true'} &nbsp; [ ] {l s='Voter ID' pdf='true'} &nbsp; [ ] {l s='Passport' pdf='true'}<br />
+							<strong>[ ] {l s='LOCAL GUEST' pdf='true'}</strong>
+							<br /><br />
+							<strong>{l s='Identity Proof:' pdf='true'}</strong>________________________________
+							&nbsp;&nbsp;
 							<strong>{l s='ID Number:' pdf='true'}</strong> ________________________________
 						</td>
 					</tr>
@@ -284,7 +286,7 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='5. ADDITIONAL GUESTS (if any)' pdf='true'}</th>
+						<th class="header-left">{l s='ADDITIONAL GUESTS (if any)' pdf='true'}</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -331,7 +333,7 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='6. BILLING & CORPORATE DETAILS' pdf='true'}</th>
+						{* <th class="header-left">{l s='6. BILLING & CORPORATE DETAILS' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
@@ -361,7 +363,7 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='7. PAYMENT & DEPOSIT' pdf='true'}</th>
+						{* <th class="header-left">{l s='7. PAYMENT & DEPOSIT' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
@@ -395,7 +397,7 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='8. PROPERTY REGULATIONS' pdf='true'}</th>
+						{* <th class="header-left">{l s='8. PROPERTY REGULATIONS' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>
@@ -444,7 +446,7 @@
 			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
 				<thead>
 					<tr>
-						<th class="header-left">{l s='FOR OFFICE USE ONLY' pdf='true'}</th>
+						{* <th class="header-left">{l s='FOR OFFICE USE ONLY' pdf='true'}</th> *}
 					</tr>
 				</thead>
 				<tbody>

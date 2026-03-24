@@ -26,6 +26,7 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
     public $order;
     public $available_in_your_account = false;
     protected $id_hotel = 0;
+    protected $id_hotel_booking_detail = null;
 
     /**
      * @param Order $objOrder
@@ -35,6 +36,8 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
     {
         $this->order = $objOrder;
         $this->smarty = $smarty;
+        // Grab the ID directly from the URL parameters
+        $this->id_hotel_booking_detail = (int)Tools::getValue('id_hotel_booking_detail');
         $this->date = Tools::displayDate($objOrder->date_add);
         $this->title = $objOrder->getUniqReference();
         $this->shop = new Shop((int)$this->order->id_shop);
@@ -47,10 +50,12 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
      */
     public function getHeader()
     {
-        $this->assignCommonHeaderData();
-        $this->smarty->assign(array('header' => self::l('Registration Form')));
+        return '';
+    }
 
-        return $this->smarty->fetch($this->getTemplate('header'));
+    public function requestMinimalMargins()
+    {
+        return true;  // Signal to PDFGenerator to use tight margins
     }
 
     /**
@@ -63,6 +68,14 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         $objCustomer = new Customer((int)$this->order->id_customer);
         $objHotelBookingDetail = new HotelBookingDetail();
         $hotelBookingDetails = $objHotelBookingDetail->getBookingDataByOrderId($this->order->id);
+        
+        // Filter booking details if room_id is provided
+        if ($this->id_hotel_booking_detail) {
+            $hotelBookingDetails = array_filter($hotelBookingDetails, function($detail) {
+                return $detail['id'] == $this->id_hotel_booking_detail;
+            });
+        }
+        
         $this->id_hotel = (int)HotelBookingDetail::getIdHotelByIdOrder($this->order->id);
 
         $data = array(
@@ -100,7 +113,11 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
      */
     public function getFilename()
     {
-        return 'registration-form-'.$this->order->reference.'.pdf';
+        $filename = 'registration-form-'.$this->order->reference;
+        if ($this->id_hotel_booking_detail) {
+            $filename .= '-room-'.$this->id_hotel_booking_detail;
+        }
+        return $filename.'.pdf';
     }
 
     /**
@@ -130,7 +147,10 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
                 $guestPhone = $objGuestAddress->phone;
             }
 
-            $guestAddress = AddressFormat::generateAddress($objGuestAddress, array(), '<br />', ' ');
+            $guestAddress = $objGuestAddress->address1;
+            if (!empty($objGuestAddress->address2)) {
+                $guestAddress .= ', ' . $objGuestAddress->address2;
+            }
 
             $guestPostcode = (string)$objGuestAddress->postcode;
             $guestCityCountryParts = array();

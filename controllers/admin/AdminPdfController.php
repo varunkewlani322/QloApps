@@ -226,6 +226,21 @@ class AdminPdfControllerCore extends AdminController
         $pdf->render('I');
     }
 
+    public function generateRegistrationFormPDFByRoom($id_order, $id_hotel_booking_detail)
+    {
+        $order = new Order((int)$id_order);
+        if (!Validate::isLoadedObject($order)) {
+            die(Tools::displayError('The order cannot be found within your database.'));
+        }
+
+        if (!HotelBookingDetail::getIdHotelByIdOrder($order->id)) {
+            die(Tools::displayError('The registration form cannot be generated for this order.'));
+        }
+
+        $pdf = new PDF($order, PDF::TEMPLATE_REGISTRATION_FORM, Context::getContext()->smarty, $id_hotel_booking_detail);
+        $pdf->render('I');
+    }
+
     public function generatePDF($object, $template)
     {
         $pdf = new PDF($object, $template, Context::getContext()->smarty);
