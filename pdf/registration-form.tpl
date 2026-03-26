@@ -128,13 +128,6 @@
 					</tr>
 				</thead>
 				<tbody>
-					{* <tr>
-						<td class="white">
-							<strong>{l s='Purpose of Visit:' pdf='true'}</strong>
-							[ ] {l s='Tourism' pdf='true'} &nbsp; [ ] {l s='Business' pdf='true'} &nbsp; [ ] {l s='Leisure' pdf='true'} &nbsp; [ ] {l s='Other:' pdf='true'} ____________
-						</td>
-						
-					</tr> *}
 					<tr>
 						<td class="white">
 							<table width="100%" cellpadding="4" cellspacing="0">
@@ -145,11 +138,21 @@
 									<td width="20%" class="white">___________________</td>
 								</tr>
 								<tr>
-									<td width="25%" class="bold">{l s='Purpose of Visit:' pdf='true'}</td>
-									<td width="30%" class="white">________________________</td>            
-									<td width="25%" class="bold">{l s='Flight / Train Number:' pdf='true'}</td>
-									<td width="20%" class="white">___________________</td>
-								</tr>
+                                    <td colspan="4" class="white">
+                                        <strong>{l s='Purpose of Visit:' pdf='true'}</strong>	
+                                        {if $registration_form.dynamic_fields.purpose_of_visit|@count}
+                                            {foreach from=$registration_form.dynamic_fields.purpose_of_visit item=item}
+                                                [ ] {$item.name|escape:'html':'UTF-8'} &nbsp;
+                                            {/foreach}
+                                        {else}
+                                            ________________________
+                                        {/if}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td width="25%" class="bold">{l s='Flight / Train Number:' pdf='true'}</td>
+                                    <td width="75%" colspan="3" class="white">___________________</td>
+                                </tr>
 							</table>
 						</td>
 					</tr>
@@ -237,17 +240,57 @@
 				</thead>
 				<tbody>
 					<tr>
-						<td class="white">
-							<strong>[ ] {l s='LOCAL GUEST' pdf='true'}</strong>
-							<br /><br />
-							<strong>{l s='Identity Proof:' pdf='true'}</strong>________________________________
-							&nbsp;&nbsp;
-							<strong>{l s='ID Number:' pdf='true'}</strong> ________________________________
-						</td>
-					</tr>
+                        <td class="white">
+                            <strong>[ ] {l s='LOCAL GUEST' pdf='true'}</strong><br /><br />
+                            <strong>{l s='Identity Proof:' pdf='true'}</strong> 
+                            {if $registration_form.dynamic_fields.identity_proof|@count}
+                                {foreach from=$registration_form.dynamic_fields.identity_proof item=item}
+                                    [ ] {$item.name|escape:'html':'UTF-8'} &nbsp;
+                                {/foreach}
+                            {else}
+                                ________________________________
+                            {/if}
+                            <br /><br />
+                            <table width="100%" cellpadding="0" cellspacing="0">
+                                <tr>
+                                    <td width="20%" class="bold">{l s='ID Number:' pdf='true'}</td>
+                                    <td width="80%" class="white">________________________________</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="white">
+                            <strong>[ ] {l s='INTERNATIONAL GUEST' pdf='true'}</strong><br />
+                            <table width="100%" cellpadding="4" cellspacing="0">
+                                <tr>
+                                    <td width="25%" class="bold">{l s='Passport No.:' pdf='true'}</td>
+                                    <td width="25%" class="white">____________________</td>
+                                    <td width="25%" class="bold">{l s='Place of Issue:' pdf='true'}</td>
+                                    <td width="25%" class="white">____________________</td>
+                                </tr>
+                                <tr>
+                                    <td width="25%" class="bold">{l s='Date of Issue:' pdf='true'}</td>
+                                    <td width="25%" class="white">____ / ____ / ____</td>
+                                    <td width="25%" class="bold">{l s='Date of Expiry:' pdf='true'}</td>
+                                    <td width="25%" class="white">____ / ____ / ____</td>
+                                </tr>
+                                <tr>
+                                    <td width="25%" class="bold">{l s='Visa Number:' pdf='true'}</td>
+                                    <td width="25%" class="white">____________________</td>
+                                    <td width="25%" class="bold">{l s='Valid Until:' pdf='true'}</td>
+                                    <td width="25%" class="white">____ / ____ / ____</td>
+                                </tr>
+                                <tr>
+                                    <td width="35%" class="bold">{l s='Arrival Date in Hotel Country:' pdf='true'}</td>
+                                    <td width="65%" class="white">____ / ____ / ____</td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
 					<tr>
 						<td class="white">
-							<strong>[ ] {l s='INTERNATIONAL GUEST (MANDATORY)' pdf='true'}</strong><br />
+							<strong>[ ] {l s='INTERNATIONAL GUEST' pdf='true'}</strong><br />
 							<table width="100%" cellpadding="4" cellspacing="0">
 								<tr>
 									<td width="25%" class="bold">{l s='Passport No.:' pdf='true'}</td>
@@ -279,219 +322,237 @@
 		</td>
 	</tr>
 
-	<tr><td colspan="12" height="10">&nbsp;</td></tr>
+	{if $registration_form.config.show_additional_guests}
+		<tr><td colspan="12" height="10">&nbsp;</td></tr>
 
-	<tr>
-		<td colspan="12">
-			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
-				<thead>
-					<tr>
-						<th class="header-left">{l s='ADDITIONAL GUESTS (if any)' pdf='true'}</th>
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="white">
-							<table width="100%" cellpadding="4" cellspacing="0">
-								<tr>
-									<th class="header small" width="8%">{l s='S.No.' pdf='true'}</th>
-									<th class="header small" width="40%">{l s='Guest Name' pdf='true'}</th>
-									<th class="header small" width="20%">{l s='ID Type' pdf='true'}</th>
-									<th class="header small" width="17%">{l s='ID Number' pdf='true'}</th>
-									<th class="header small" width="15%">{l s='Nationality' pdf='true'}</th>
-								</tr>
-								{section name=ag loop=$registration_form.property.additional_guests_rows}
-									<tr class="color_line_even">
-										<td class="center white">{$smarty.section.ag.iteration}</td>
-										<td class="white">______________________________</td>
-										<td class="white">________________</td>
-										<td class="white">________________</td>
-										<td class="white">____________</td>
+		<tr>
+			<td colspan="12">
+				<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
+					<thead>
+						<tr>
+							<th class="header-left">{l s='ADDITIONAL GUESTS (if any)' pdf='true'}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="white">
+								<table width="100%" cellpadding="4" cellspacing="0">
+									<tr>
+										<th class="header small" width="8%">{l s='S.No.' pdf='true'}</th>
+										<th class="header small" width="40%">{l s='Guest Name' pdf='true'}</th>
+										<th class="header small" width="20%">{l s='ID Type' pdf='true'}</th>
+										<th class="header small" width="17%">{l s='ID Number' pdf='true'}</th>
+										<th class="header small" width="15%">{l s='Nationality' pdf='true'}</th>
 									</tr>
-								{/section}
-								{if !$registration_form.property.additional_guests_rows}
-									<tr class="color_line_even">
-										<td class="center white">1</td>
-										<td class="white">______________________________</td>
-										<td class="white">________________</td>
-										<td class="white">________________</td>
-										<td class="white">____________</td>
+									{section name=ag loop=$registration_form.property.additional_guests_rows}
+										<tr class="color_line_even">
+											<td class="center white">{$smarty.section.ag.iteration}</td>
+											<td class="white">______________________________</td>
+											<td class="white">________________</td>
+											<td class="white">________________</td>
+											<td class="white">____________</td>
+										</tr>
+									{/section}
+									{if !$registration_form.property.additional_guests_rows}
+										<tr class="color_line_even">
+											<td class="center white">1</td>
+											<td class="white">______________________________</td>
+											<td class="white">________________</td>
+											<td class="white">________________</td>
+											<td class="white">____________</td>
+										</tr>
+									{/if}
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	{/if}
+
+	{if $registration_form.config.show_billing_corporate_details}
+		<tr><td colspan="12" height="10">&nbsp;</td></tr>
+
+		<tr>
+			<td colspan="12">
+				<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
+					<thead>
+						<tr>
+							{* <th class="header-left">{l s='6. BILLING & CORPORATE DETAILS' pdf='true'}</th> *}
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="white">
+								<table width="100%" cellpadding="4" cellspacing="0">
+									<tr>
+										<td width="25%" class="bold">{l s='Company / Agent:' pdf='true'}</td>
+										<td width="75%" class="white">______________________________________________</td>
 									</tr>
+									<tr>
+										<td width="25%" class="bold">{l s='Tax ID / VAT No.:' pdf='true'}</td>
+										<td width="75%" class="white">______________________________________________</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	{/if}
+
+	{if $registration_form.config.show_payment_deposit}
+		<tr><td colspan="12" height="10">&nbsp;</td></tr>
+
+		<tr>
+			<td colspan="12">
+				<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
+					<thead>
+						<tr>
+							{* <th class="header-left">{l s='7. PAYMENT & DEPOSIT' pdf='true'}</th> *}
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="white">
+								<strong>{l s='Payment Method:' pdf='true'}</strong>
+								{if $registration_form.dynamic_fields.payment_method|@count}
+									{foreach from=$registration_form.dynamic_fields.payment_method item=item}
+										[ ] {$item.name|escape:'html':'UTF-8'} &nbsp;
+									{/foreach}
+								{else}
+									________________________
 								{/if}
-							</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="white">
+								<table width="100%" cellpadding="4" cellspacing="0">
+									<tr>
+										<td width="25%" class="bold">{l s='Credit Card Number:' pdf='true'}</td>
+										<td width="40%" class="white">________________________________</td>
+										<td width="20%" class="bold">{l s='Security Deposit:' pdf='true'}</td>
+										<td width="15%" class="white">__________</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	{/if}
+
+	{if $registration_form.config.show_property_regulations}
+		<tr><td colspan="12" height="10">&nbsp;</td></tr>
+
+		<tr>
+			<td colspan="12">
+				<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
+					<thead>
+						<tr>
+							{* <th class="header-left">{l s='8. PROPERTY REGULATIONS' pdf='true'}</th> *}
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="white">
+								<table width="100%" cellpadding="4" cellspacing="0">
+									<tr>
+										<td width="25%" class="bold">{l s='Guest Signature:' pdf='true'}</td>
+										<td width="45%" class="white">______________________________</td>
+										<td width="10%" class="bold">{l s='Date:' pdf='true'}</td>
+										<td width="20%" class="white">____ / ____ / ________</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+						<tr>
+							<td class="white">
+								<strong>{l s='Check-in Time:' pdf='true'}</strong>
+								{if $registration_form.hotel.check_in_time}{$registration_form.hotel.check_in_time|escape:'html':'UTF-8'}{else}__________{/if}
+								&nbsp;&nbsp;&nbsp;
+								<strong>{l s='Check-out Time:' pdf='true'}</strong>
+								{if $registration_form.hotel.check_out_time}{$registration_form.hotel.check_out_time|escape:'html':'UTF-8'}{else}__________{/if}
+							</td>
+						</tr>
+						<tr>
+							<td class="white">
+								<strong>{l s='Hotel Policies:' pdf='true'}</strong><br />
+								{if $registration_form.hotel.policies}
+									{$registration_form.hotel.policies}
+								{else}
+									______________________________<br />
+									______________________________<br />
+									______________________________
+								{/if}
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	{/if}
+
+	{if $registration_form.config.show_office_use_only}
+		<tr><td colspan="12" height="10">&nbsp;</td></tr>
+
+		<tr>
+			<td colspan="12">
+				<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
+					<thead>
+						<tr>
+							{* <th class="header-left">{l s='FOR OFFICE USE ONLY' pdf='true'}</th> *}
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td class="white">
+								<table width="100%" cellpadding="4" cellspacing="0">
+									<tr>
+										<td width="20%" class="bold">{l s='Staff Name:' pdf='true'}</td>
+										<td width="30%" class="white">____________________</td>
+										<td width="20%" class="bold">{l s='Check-in Time:' pdf='true'}</td>
+										<td width="30%" class="white">____________________</td>
+									</tr>
+									<tr>
+										<td width="20%" class="bold">{l s='ID Verified:' pdf='true'}</td>
+										<td width="30%" class="white">[ ] {l s='Yes' pdf='true'} &nbsp; [ ] {l s='No' pdf='true'}</td>
+										<td width="20%" class="bold">{l s='Registration No.:' pdf='true'}</td>
+										<td width="30%" class="white">____________________</td>
+									</tr>
+								</table>
+							</td>
+						</tr>
+					</tbody>
+				</table>
+			</td>
+		</tr>
+	{/if}
+
+	{if $registration_form.config.show_footer}
+		<tr><td colspan="12" height="10">&nbsp;</td></tr>
+
+		<tr>
+			<td colspan="12">
+				<table width="100%" cellpadding="3" cellspacing="0" nobr="true">
+					<tr>
+						<td width="100%" class="center small">
+							{if $registration_form.hotel.address}{$registration_form.hotel.address}{else}[Property Address]{/if}
+							<br />
+							{l s='Phone No.:' pdf='true'} {if $registration_form.hotel.phone}{$registration_form.hotel.phone|escape:'html':'UTF-8'}{else}__________{/if}
+							&nbsp;|&nbsp;
+							{l s='Email:' pdf='true'} {if $registration_form.hotel.email}{$registration_form.hotel.email|escape:'html':'UTF-8'}{else}__________{/if}
+							&nbsp;|&nbsp;
+							{l s='Website:' pdf='true'} {$registration_form.property.website|escape:'html':'UTF-8'}
 						</td>
 					</tr>
-				</tbody>
-			</table>
-		</td>
-	</tr>
-
-	<tr><td colspan="12" height="10">&nbsp;</td></tr>
-
-	<tr>
-		<td colspan="12">
-			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
-				<thead>
-					<tr>
-						{* <th class="header-left">{l s='6. BILLING & CORPORATE DETAILS' pdf='true'}</th> *}
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="white">
-							<table width="100%" cellpadding="4" cellspacing="0">
-								<tr>
-									<td width="25%" class="bold">{l s='Company / Agent:' pdf='true'}</td>
-									<td width="75%" class="white">______________________________________________</td>
-								</tr>
-								<tr>
-									<td width="25%" class="bold">{l s='Tax ID / VAT No.:' pdf='true'}</td>
-									<td width="75%" class="white">______________________________________________</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</td>
-	</tr>
-
-	<tr><td colspan="12" height="10">&nbsp;</td></tr>
-
-	<tr>
-		<td colspan="12">
-			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
-				<thead>
-					<tr>
-						{* <th class="header-left">{l s='7. PAYMENT & DEPOSIT' pdf='true'}</th> *}
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="white">
-							<strong>{l s='Payment Method:' pdf='true'}</strong>
-							[ ] {l s='Cash' pdf='true'} &nbsp; [ ] {l s='Credit Card' pdf='true'} &nbsp; [ ] {l s='Company Bill' pdf='true'} &nbsp; [ ] {l s='Prepaid' pdf='true'}
-						</td>
-					</tr>
-					<tr>
-						<td class="white">
-							<table width="100%" cellpadding="4" cellspacing="0">
-								<tr>
-									<td width="25%" class="bold">{l s='Credit Card Number:' pdf='true'}</td>
-									<td width="40%" class="white">________________________________</td>
-									<td width="20%" class="bold">{l s='Security Deposit:' pdf='true'}</td>
-									<td width="15%" class="white">__________</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</td>
-	</tr>
-
-	<tr><td colspan="12" height="10">&nbsp;</td></tr>
-
-	<tr>
-		<td colspan="12">
-			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
-				<thead>
-					<tr>
-						{* <th class="header-left">{l s='8. PROPERTY REGULATIONS' pdf='true'}</th> *}
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="white">
-							<table width="100%" cellpadding="4" cellspacing="0">
-								<tr>
-									<td width="25%" class="bold">{l s='Guest Signature:' pdf='true'}</td>
-									<td width="45%" class="white">______________________________</td>
-									<td width="10%" class="bold">{l s='Date:' pdf='true'}</td>
-									<td width="20%" class="white">____ / ____ / ________</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-					<tr>
-						<td class="white">
-							<strong>{l s='Check-in Time:' pdf='true'}</strong>
-							{if $registration_form.hotel.check_in_time}{$registration_form.hotel.check_in_time|escape:'html':'UTF-8'}{else}__________{/if}
-							&nbsp;&nbsp;&nbsp;
-							<strong>{l s='Check-out Time:' pdf='true'}</strong>
-							{if $registration_form.hotel.check_out_time}{$registration_form.hotel.check_out_time|escape:'html':'UTF-8'}{else}__________{/if}
-						</td>
-					</tr>
-					<tr>
-						<td class="white">
-							<strong>{l s='Hotel Policies:' pdf='true'}</strong><br />
-							{if $registration_form.hotel.policies}
-								{$registration_form.hotel.policies}
-							{else}
-								______________________________<br />
-								______________________________<br />
-								______________________________
-							{/if}
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</td>
-	</tr>
-
-	<tr><td colspan="12" height="10">&nbsp;</td></tr>
-
-	<tr>
-		<td colspan="12">
-			<table class="bordered-table" width="100%" cellpadding="5" cellspacing="0" nobr="true">
-				<thead>
-					<tr>
-						{* <th class="header-left">{l s='FOR OFFICE USE ONLY' pdf='true'}</th> *}
-					</tr>
-				</thead>
-				<tbody>
-					<tr>
-						<td class="white">
-							<table width="100%" cellpadding="4" cellspacing="0">
-								<tr>
-									<td width="20%" class="bold">{l s='Staff Name:' pdf='true'}</td>
-									<td width="30%" class="white">____________________</td>
-									<td width="20%" class="bold">{l s='Check-in Time:' pdf='true'}</td>
-									<td width="30%" class="white">____________________</td>
-								</tr>
-								<tr>
-									<td width="20%" class="bold">{l s='ID Verified:' pdf='true'}</td>
-									<td width="30%" class="white">[ ] {l s='Yes' pdf='true'} &nbsp; [ ] {l s='No' pdf='true'}</td>
-									<td width="20%" class="bold">{l s='Registration No.:' pdf='true'}</td>
-									<td width="30%" class="white">____________________</td>
-								</tr>
-							</table>
-						</td>
-					</tr>
-				</tbody>
-			</table>
-		</td>
-	</tr>
-
-	<tr><td colspan="12" height="10">&nbsp;</td></tr>
-
-	<tr>
-		<td colspan="12">
-			<table width="100%" cellpadding="3" cellspacing="0" nobr="true">
-				<tr>
-					<td width="100%" class="center small">
-						{if $registration_form.hotel.address}{$registration_form.hotel.address}{else}[Property Address]{/if}
-						<br />
-						{l s='Phone No.:' pdf='true'} {if $registration_form.hotel.phone}{$registration_form.hotel.phone|escape:'html':'UTF-8'}{else}__________{/if}
-						&nbsp;|&nbsp;
-						{l s='Email:' pdf='true'} {if $registration_form.hotel.email}{$registration_form.hotel.email|escape:'html':'UTF-8'}{else}__________{/if}
-						&nbsp;|&nbsp;
-						{l s='Website:' pdf='true'} {$registration_form.property.website|escape:'html':'UTF-8'}
-					</td>
-				</tr>
-			</table>
-		</td>
-	</tr>
+				</table>
+			</td>
+		</tr>
+	{/if}
 
 	{if isset($HOOK_DISPLAY_PDF)}
 	<tr>

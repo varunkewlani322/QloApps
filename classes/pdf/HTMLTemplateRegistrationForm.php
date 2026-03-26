@@ -50,12 +50,16 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
      */
     public function getHeader()
     {
+        if ($this->isPdfHeaderEnabled()) {
+            return parent::getHeader();
+        }
+
         return '';
     }
 
     public function requestMinimalMargins()
     {
-        return true;  // Signal to PDFGenerator to use tight margins
+        return !$this->isPdfHeaderEnabled();
     }
 
     /**
@@ -85,6 +89,8 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
                 'hotel' => $this->getHotelData($hotelBookingDetails),
                 'stay' => $this->getStayData($hotelBookingDetails),
                 'property' => $this->getPropertyData($hotelBookingDetails),
+                'config' => $this->getRegistrationConfig(),
+                'dynamic_fields' => $this->getDynamicFields(),
             ),
         );
 
@@ -425,6 +431,66 @@ class HTMLTemplateRegistrationFormCore extends HTMLTemplate
         }
 
         return '';
+    }
+
+    /**
+     * @return bool
+     */
+    protected function isPdfHeaderEnabled()
+    {
+        return (bool)Configuration::get('QLO_GUEST_REG_ENABLE_HEADER');
+    }
+
+    /**
+     * @return array
+     */
+    protected function getRegistrationConfig()
+    {
+        $selectedSections = $this->getSelectedOptionalSections();
+
+        return array(
+            'show_header' => $this->isPdfHeaderEnabled(),
+            'show_additional_guests' => in_array(1, $selectedSections),
+            'show_billing_corporate_details' => in_array(2, $selectedSections),
+            'show_payment_deposit' => in_array(3, $selectedSections),
+            'show_property_regulations' => in_array(4, $selectedSections),
+            'show_office_use_only' => in_array(5, $selectedSections),
+            'show_footer' => in_array(6, $selectedSections),
+        );
+    }
+
+    /**
+     * @return array
+     */
+    protected function getDynamicFields()
+    {
+        $idLang = (int)$this->order->id_lang;
+
+        return array(
+            'purpose_of_visit' => GuestRegPurpose::getActiveOptions($idLang),
+            'identity_proof' => GuestRegIdProof::getActiveOptions($idLang),
+            'payment_method' => GuestRegPaymentMethod::getActiveOptions($idLang),
+        );
+    }
+
+    /**
+     * @return array
+     */
+    protected function getSelectedOptionalSections()
+    {
+        $value = Configuration::get('QLO_GUEST_REG_OPTIONAL_SECTIONS');
+
+        if ($value === false || $value === '') {
+            return array(1, 2, 3, 4, 5, 6);
+        }
+
+        $value = Tools::jsonDecode($value, true);
+
+        if (!is_array($value)) {
+            return array();
+        }
+
+        return array_map('intval', $value);
     }
 
     /**
