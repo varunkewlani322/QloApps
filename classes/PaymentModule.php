@@ -853,6 +853,33 @@ abstract class PaymentModuleCore extends Module
                                 $objBookingDetail->date_to = $objCartBookingData->date_to;
                                 $objBookingDetail->total_price_tax_excl = $total_price['total_price_tax_excl'];
                                 $objBookingDetail->total_price_tax_incl = $total_price['total_price_tax_incl'];
+
+                                // Use the unit price already computed natively by PrestaShop when it
+                                // created the order_detail row. For hotel rooms, PS sets product_quantity
+                                // = numNights and unit_price = per-night price, so this is already
+                                // correctly divided — no custom math needed.
+                                $objNativeOrderDetail = new OrderDetail((int)$id_order_detail);
+                                if (Validate::isLoadedObject($objNativeOrderDetail)) {
+                                    $objBookingDetail->unit_price_tax_excl = (float)$objNativeOrderDetail->unit_price_tax_excl;
+                                    $objBookingDetail->unit_price_tax_incl = (float)$objNativeOrderDetail->unit_price_tax_incl;
+                                } else {
+                                    // Defensive fallback — should not be reached under normal operation.
+                                    $numDays = (int)HotelHelper::getNumberOfDays(
+                                        $objCartBookingData->date_from,
+                                        $objCartBookingData->date_to
+                                    );
+                                    if ($numDays > 0) {
+                                        $objBookingDetail->unit_price_tax_excl = (float)Tools::processPriceRounding(
+                                            $total_price['total_price_tax_excl'] / $numDays, 6
+                                        );
+                                        $objBookingDetail->unit_price_tax_incl = (float)Tools::processPriceRounding(
+                                            $total_price['total_price_tax_incl'] / $numDays, 6
+                                        );
+                                    } else {
+                                        $objBookingDetail->unit_price_tax_excl = (float)$total_price['total_price_tax_excl'];
+                                        $objBookingDetail->unit_price_tax_incl = (float)$total_price['total_price_tax_incl'];
+                                    }
+                                }
                                 $objBookingDetail->adults = $objCartBookingData->adults;
                                 $objBookingDetail->children = $objCartBookingData->children;
                                 $objBookingDetail->child_ages = $objCartBookingData->child_ages;

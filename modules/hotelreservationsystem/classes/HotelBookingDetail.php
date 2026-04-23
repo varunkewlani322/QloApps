@@ -42,6 +42,8 @@ class HotelBookingDetail extends ObjectModel
     public $date_from;
     public $date_to;
     public $total_price_tax_excl;    // Total price paid for this date range for this room type
+    public $unit_price_tax_excl;     // Unit price per day excluding tax
+    public $unit_price_tax_incl;     // Unit price per day including tax
     public $total_price_tax_incl;    // Total price paid for this date range for this room type
     public $total_paid_amount;       // Advance payment amount for the room
     public $is_back_order;
@@ -109,6 +111,8 @@ class HotelBookingDetail extends ObjectModel
             'date_from' => array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true),
             'date_to' => array('type' => self::TYPE_DATE, 'validate' => 'isDate', 'required' => true),
             'total_price_tax_excl' => array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true),
+            'unit_price_tax_excl' => array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true, 'default' => 0),
+            'unit_price_tax_incl' => array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true, 'default' => 0),
             'total_price_tax_incl' => array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'required' => true),
             'total_paid_amount' => array('type' => self::TYPE_FLOAT, 'validate' => 'isPrice', 'default' => 0, 'required' => true),
             'is_refunded' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),

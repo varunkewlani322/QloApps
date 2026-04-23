@@ -5711,6 +5711,52 @@ class AdminOrdersControllerCore extends AdminController
                             }
                             $objServiceProductOrderDetail->save();
                         }
+                        if ($cartProducts[0]['booking_product']) {  // If this is a hotel booking product
+                            $objHotelCartData = new HotelCartBookingData();
+                            $cartBookingData = $objHotelCartData->getOnlyCartBookingData(
+                                $this->context->cart->id,
+                                null,
+                                $idProduct
+                            );
+                            
+                            if ($cartBookingData) {
+                                foreach ($cartBookingData as $bookingInfo) {
+                                    $objCartBookingData = new HotelCartBookingData($bookingInfo['id']);
+                                    $numDays = (int)HotelHelper::getNumberOfDays(
+                                        $objCartBookingData->date_from,
+                                        $objCartBookingData->date_to
+                                    );
+                                    
+                                    $objBookingDetail = new HotelBookingDetail();
+                                    if ($bookingDetails = $objBookingDetail->getBookingDataByOrderId($objOrder->id)) {
+                                        foreach ($bookingDetails as $detail) {
+                                            if ($detail['id_product'] == $idProduct && 
+                                                $detail['date_from'] == $objCartBookingData->date_from &&
+                                                $detail['date_to'] == $objCartBookingData->date_to) {
+                                                
+                                                $objBookingDetail = new HotelBookingDetail($detail['id']);
+                                                // Use the per-night unit price from the already-saved
+                                                // order_detail (PS sets unit_price = per-night rate when
+                                                // product_quantity = numNights). No custom division needed.
+                                                $objAddOd = new OrderDetail((int)$objBookingDetail->id_order_detail);
+                                                if (Validate::isLoadedObject($objAddOd)) {
+                                                    $objBookingDetail->unit_price_tax_excl = (float)$objAddOd->unit_price_tax_excl;
+                                                    $objBookingDetail->unit_price_tax_incl = (float)$objAddOd->unit_price_tax_incl;
+                                                } elseif ($numDays > 0) {
+                                                    $objBookingDetail->unit_price_tax_excl = (float)Tools::processPriceRounding(
+                                                        $detail['total_price_tax_excl'] / $numDays, 6
+                                                    );
+                                                    $objBookingDetail->unit_price_tax_incl = (float)Tools::processPriceRounding(
+                                                        $detail['total_price_tax_incl'] / $numDays, 6
+                                                    );
+                                                }
+                                                $objBookingDetail->update();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
 
                         $response['status'] = true;
                     } else {
@@ -5951,6 +5997,14 @@ class AdminOrdersControllerCore extends AdminController
 
         // Save order detail
         $res &= $order_detail->update();
+
+        // Sync hbd unit prices from the freshly-committed order_detail.
+        // order_detail.unit_price_tax_excl = per-night rate (PS stores unit_price = total/quantity
+        // and quantity = numNights for hotel rooms), so this mirrors the native pricing engine
+        // without any custom division.
+        $obj_booking_detail->unit_price_tax_excl = (float)$order_detail->unit_price_tax_excl;
+        $obj_booking_detail->unit_price_tax_incl = (float)$order_detail->unit_price_tax_incl;
+        $res &= $obj_booking_detail->update();
 
         // Update weight SUM
         $order_carrier = new OrderCarrier((int)$order->getIdOrderCarrier());
@@ -6318,6 +6372,8 @@ class AdminOrdersControllerCore extends AdminController
             $objServiceProductOrderDetail->total_price_tax_incl = $totalProductsTaxIncl;
             $objServiceProductOrderDetail->quantity += $updateQty;
             $result &= $objServiceProductOrderDetail->update();
+            // Note: hbd (room booking) unit prices are NOT updated here.
+            // Editing a service product does not change the room's nightly rate.
 
             // Apply changes on Order
             $objOrder = new Order($objOrderDetail->id_order);

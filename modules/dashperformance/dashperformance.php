@@ -68,6 +68,10 @@ class DashPerformance extends Module
     {
         $data = array();
         if (Configuration::get('PS_DASHBOARD_SIMULATION')) {
+            // ddd(Configuration::get('PS_DASHBOARD_SIMULATION'));
+            // $objHotelAnalytics = new HotelAnalytics();
+            // ddd($data['dp_direct_revenue_ratio'] = $objHotelAnalytics->getRoomAnalytics('total_sales', $params['date_from'],$params['date_to'],$params['id_hotel']));
+
             $data['dp_average_daily_rate'] = Tools::displayPrice(sprintf('%0.2f', rand(100000, 1000000) / 100));
             $data['dp_total_revenue_per_available_room'] = Tools::displayPrice(sprintf('%0.2f', rand(pow(10, 5), pow(10, 6)) / 100));
             $data['dp_average_occupancy_rate'] = sprintf('%0.2f', rand(5000, 10000) / 100).'%';
@@ -77,6 +81,7 @@ class DashPerformance extends Module
             $data['dp_direct_revenue_ratio'] = sprintf('%0.2f', rand(4000, 8000) / 100).'%';
             $data['dp_cancellation_rate'] = sprintf('%0.2f', rand(1, 1000) / 100).'%';
         } else {
+            // ddd(23);
             $data['dp_average_daily_rate'] = Tools::displayPrice(AdminStatsController::getAverageDailyRate(
                 $params['date_from'],
                 $params['date_to'],
@@ -88,6 +93,33 @@ class DashPerformance extends Module
                 $params['date_to'],
                 $params['id_hotel']
             )).'%';
+
+            // $objHotelAnalytics = new HotelAnalytics();
+            // ($roomRev = $objHotelAnalytics->getRoomAnalytics('total_revenue', $params['date_from'],$params['date_to'],$params['id_hotel']));
+            // ($serviceRev = $objHotelAnalytics->getServiceAnalytics('service_total_revenue', $params['date_from'],$params['date_to'],$params['id_hotel']));
+            // $totalRevenue = (float)$roomRev + (float)$serviceRev;
+            // $totalPhysicalRooms = AdminStatsController::getTotalRooms($params['id_hotel'], true); 
+    
+            // // Calculate the number of days in the period
+            // $days = (strtotime($params['date_to']) - strtotime($params['date_from'])) / (60 * 60 * 24);
+            // $days = $days == 0 ? 1 : $days; // Prevent division by zero for same-day queries
+            
+            // $totalAvailableRoomNights = $totalPhysicalRooms * $days;
+
+            // // 3. Calculate TRevPAR
+            // // ddd($days);
+            // if ($totalAvailableRoomNights > 0) {
+            //     ddd($totalRevenue / $totalAvailableRoomNights);
+            // }
+            $analytics = new HotelAnalyticsCore();
+            ddd($revenueByDate = $analytics->getRoomAnalytics(
+                HotelAnalyticsCore::METRIC_TOTAL_REVENUE,
+                $params['date_from'],
+                $params['date_to'],
+                array('datewise_breakdown' => false, 'id_hotel' => $params['idHotel'])
+            ));
+
+
 
             $data['dp_average_occupancy_rate'] = sprintf('%0.2f', AdminStatsController::getAverageOccupancyRate(
                 $params['date_from'],
@@ -112,6 +144,7 @@ class DashPerformance extends Module
                 $params['date_to'],
                 $params['id_hotel']
             ));
+            // ddd($data['dp_total_revenue_per_available_room']);
 
             $data['dp_gross_operating_profit_par'] = Tools::displayPrice(AdminStatsController::getGrossOperatingProfitPerAvailableRoom(
                 $params['date_from'],
