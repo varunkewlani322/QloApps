@@ -135,7 +135,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             }
 
             if (Tools::getValue('id_hotel')) {
-                $id_hotel = Tools::getValue('id_hotel');
+                $id_hotel = (int)Tools::getValue('id_hotel');
             } else {
                 if ($htl_info = $objHotelBranchInformation->hotelBranchesInfo(false, 1)) {
                     // filter hotels as per accessed hotels
@@ -151,7 +151,7 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             }
 
             if (Tools::getValue('id_room_type')) {
-                $id_room_type = Tools::getValue('id_room_type');
+                $id_room_type = (int)Tools::getValue('id_room_type');
             } else {
                 $id_room_type = 0;
             }
@@ -467,8 +467,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
             'data' => array()
         );
 
-        $searchIdHotel = Tools::getValue('search_id_hotel');
-        $searchIdRoomType = Tools::getValue('search_id_room_type');
+        $searchIdHotel = (int)Tools::getValue('search_id_hotel');
+        $searchIdRoomType = (int)Tools::getValue('search_id_room_type');
         $searchDateFrom = Tools::getValue('search_date_from');
         $searchDateTo = Tools::getValue('search_date_to');
 
@@ -516,8 +516,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
 
         $start_date = date('Y-m-d', strtotime(Tools::getValue('start')));
         $last_day_this_month  = date('Y-m-d', strtotime(Tools::getValue('end')));
-        $searchIdHotel = Tools::getValue('search_id_hotel');
-        $searchIdRoomType = Tools::getValue('search_id_room_type');
+        $searchIdHotel = (int)Tools::getValue('search_id_hotel');
+        $searchIdRoomType = (int)Tools::getValue('search_id_room_type');
         $searchDateFrom = Tools::getValue('search_date_from');
         $searchDateTo = Tools::getValue('search_date_to');
 
@@ -611,10 +611,10 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $response = array(
             'status' => false
         );
-        $id_product = Tools::getValue('id_product');
-        $quantity = Tools::getValue('qty', 1);
-        $id_hotel = Tools::getValue('id_hotel');
-        $opt = Tools::getValue('opt', 1);
+        $id_product = (int)Tools::getValue('id_product');
+        $quantity = (int)Tools::getValue('qty', 1);
+        $id_hotel = (int)Tools::getValue('id_hotel');
+        $opt = (int)Tools::getValue('opt', 1);
         if (!Validate::isLoadedObject($this->context->cart)) {
             $this->createNewCart();
         }
@@ -679,8 +679,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $comment = Tools::getValue('comment');
 
         // for both (add , delete)
-        $id_hotel = Tools::getValue('id_hotel');
-        $id_product = Tools::getValue('id_prod');
+        $id_hotel = (int)Tools::getValue('id_hotel');
+        $id_product = (int)Tools::getValue('id_prod');
         $date_from = Tools::getValue('date_from');
         $date_to = Tools::getValue('date_to');
         $occupancy = Tools::getValue('occupancy');
@@ -693,8 +693,8 @@ class AdminHotelRoomsBookingController extends ModuleAdminController
         $date_from = date("Y-m-d H:i:s", strtotime($date_from));
         $date_to = date("Y-m-d H:i:s", strtotime($date_to));
 
-        $search_id_room_type = Tools::getValue('search_id_room_type');
-        $search_id_hotel = Tools::getValue('search_id_hotel');
+        $search_id_room_type = (int)Tools::getValue('search_id_room_type');
+        $search_id_hotel = (int)Tools::getValue('search_id_hotel');
         $search_date_from = Tools::getValue('search_date_from');
         $search_date_to = Tools::getValue('search_date_to');
 
