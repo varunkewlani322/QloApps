@@ -89,6 +89,10 @@ class AdminFeaturesControllerCore extends AdminController
             )
         );
         parent::__construct();
+
+        if (!Tools::getIsset('viewfeature')) {
+            $this->addRowAction('view');
+        }
     }
 
     /**
@@ -97,7 +101,6 @@ class AdminFeaturesControllerCore extends AdminController
      */
     public function renderList()
     {
-        /*$this->addRowAction('view');*//*by webkul*/
         $this->addRowAction('edit');
         $this->addRowAction('delete');
 
@@ -124,6 +127,31 @@ class AdminFeaturesControllerCore extends AdminController
         $this->identifier = 'id_feature';
     }
 
+    /**
+     * Return a translated field value with a safe fallback when the current language is missing.
+     *
+     * @param array $values
+     * @param int   $idLang
+     * @param string $default
+     *
+     * @return string
+     */
+    protected function getTranslatedFieldValue(array $values, $idLang, $default = '')
+    {
+        $idLang = (int) $idLang;
+        if (isset($values[$idLang]) && '' !== trim((string) $values[$idLang])) {
+            return $values[$idLang];
+        }
+
+        foreach ($values as $value) {
+            if ('' !== trim((string) $value)) {
+                return $value;
+            }
+        }
+
+        return $default;
+    }
+
     public function renderView()
     {
         if (($id = Tools::getValue('id_feature'))) {
@@ -140,8 +168,12 @@ class AdminFeaturesControllerCore extends AdminController
                 return;
             }
 
-            $this->feature_name = $obj->name;
-            $this->toolbar_title = $this->feature_name[$this->context->employee->id_lang];
+            $this->feature_name = is_array($obj->name) ? $obj->name : array();
+            $this->toolbar_title = $this->getTranslatedFieldValue(
+                $this->feature_name,
+                $this->context->employee->id_lang,
+                $this->l('Feature')
+            );
             $this->fields_list = array(
                 'id_feature_value' => array(
                     'title' => $this->l('ID'),
@@ -322,7 +354,11 @@ class AdminFeaturesControllerCore extends AdminController
                 break;
 
             case 'view':
-                $bread_extended[] = $this->feature_name[$this->context->employee->id_lang];
+                $bread_extended[] = $this->getTranslatedFieldValue(
+                    is_array($this->feature_name) ? $this->feature_name : array(),
+                    $this->context->employee->id_lang,
+                    $this->l('Feature')
+                );
                 $this->addMetaTitle($bread_extended[count($bread_extended) - 1]);
                 break;
 
@@ -330,11 +366,22 @@ class AdminFeaturesControllerCore extends AdminController
                 if (($idFeature_value = Tools::getValue('id_feature_value'))) {
                     if (($id = Tools::getValue('id_feature'))) {
                         if (Validate::isLoadedObject($obj = new Feature((int)$id))) {
-                            $bread_extended[] = '<a href="'.Context::getContext()->link->getAdminLink('AdminFeatures').'&id_feature='.$id.'&viewfeature">'.$obj->name[$this->context->employee->id_lang].'</a>';
+                            $bread_extended[] = '<a href="'.Context::getContext()->link->getAdminLink('AdminFeatures').'&id_feature='.$id.'&viewfeature">'.$this->getTranslatedFieldValue(
+                                is_array($obj->name) ? $obj->name : array(),
+                                $this->context->employee->id_lang,
+                                $this->l('Feature')
+                            ).'</a>';
                         }
 
                         if (Validate::isLoadedObject($obj = new FeatureValue((int)Tools::getValue('id_feature_value')))) {
-                            $bread_extended[] =  sprintf($this->l('Edit: %s'), $obj->value[$this->context->employee->id_lang]);
+                            $bread_extended[] =  sprintf(
+                                $this->l('Edit: %s'),
+                                $this->getTranslatedFieldValue(
+                                    is_array($obj->value) ? $obj->value : array(),
+                                    $this->context->employee->id_lang,
+                                    $this->l('Value')
+                                )
+                            );
                         }
                     } else {
                         $bread_extended[] = $this->l('Edit Value');
@@ -549,13 +596,15 @@ class AdminFeaturesControllerCore extends AdminController
     {
         $object = parent::processAdd();
 
-        if (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && !count($this->errors)) {
-            if ($this->table == 'feature_value' && ($this->display == 'edit' || $this->display == 'add')) {
+        if ('feature_value' === $this->table && !count($this->errors)) {
+            if (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && ($this->display == 'edit' || $this->display == 'add')) {
                 $this->redirect_after = self::$currentIndex.'&addfeature_value&id_feature='.(int)Tools::getValue('id_feature').'&token='.$this->token;
             } else {
-                $this->redirect_after = self::$currentIndex.'&'.$this->identifier.'='.(int) $object->id.'&conf=3&update'.$this->table.'&token='.$this->token;
+                $this->redirect_after = self::$currentIndex.'&id_feature='.(int)Tools::getValue('id_feature').'&viewfeature&conf=3&token='.$this->token;
             }
-        } elseif (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && count($this->errors) && $this->table == 'feature_value') { // enter only if feature is submitted
+        } elseif (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && !count($this->errors)) {
+            $this->redirect_after = self::$currentIndex.'&'.$this->identifier.'='.(int) $object->id.'&conf=3&update'.$this->table.'&token='.$this->token;
+        } elseif (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && count($this->errors) && 'feature_value' === $this->table) { // enter only if feature is submitted
             $this->display = 'editFeatureValue';
         }
 
@@ -570,8 +619,14 @@ class AdminFeaturesControllerCore extends AdminController
     {
         $object = parent::processUpdate();
 
-        if (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && !count($this->errors)) {
-            $this->redirect_after = self::$currentIndex.'&'.$this->identifier.'='.(int) Tools::getValue('id_feature').'&conf=4&update'.$this->table.'&token='.$this->token;
+        if ('feature_value' === $this->table && !count($this->errors)) {
+            if (Tools::isSubmit('submitAdd'.$this->table.'AndStay')) {
+                $this->redirect_after = self::$currentIndex.'&updatefeature_value&id_feature_value='.(int)$object->id.'&id_feature='.(int)Tools::getValue('id_feature').'&token='.$this->token;
+            } else {
+                $this->redirect_after = self::$currentIndex.'&id_feature='.(int)Tools::getValue('id_feature').'&viewfeature&conf=4&token='.$this->token;
+            }
+        } elseif (Tools::isSubmit('submitAdd'.$this->table.'AndStay') && !count($this->errors)) {
+            $this->redirect_after = self::$currentIndex.'&'.$this->identifier.'='.(int)$object->id.'&conf=4&update'.$this->table.'&token='.$this->token;
         }
 
         return $object;
@@ -584,6 +639,10 @@ class AdminFeaturesControllerCore extends AdminController
      */
     public function processSave()
     {
+        if ('feature_value' === $this->table) {
+            return parent::processSave();
+        }
+
         if ($this->table == 'feature') {
             $idFeature = (int)Tools::getValue('id_feature');
             // Adding last position to the feature if not exist
@@ -628,24 +687,12 @@ class AdminFeaturesControllerCore extends AdminController
                         $this->errors[] = $this->l('Some error occurred while uploding room feature logo. Please try again.');
                     }
                 }
-
-                if ($featureValues = FeatureValue::getFeatureValuesWithLang(
-                    $this->context->language->id,
-                    $objFeature->id
-                )) {
-                    $objFeatureValue = new FeatureValue($featureValues[0]['id_feature_value']);
-                } else {
-                    $objFeatureValue = new FeatureValue();
-                }
-
-                $objFeatureValue->id_feature = $objFeature->id;
-                foreach (Language::getLanguages(true) as $lang) {
-                    $objFeatureValue->value[$lang['id_lang']] = $objFeature->id.'.jpg';
-                }
-                $objFeatureValue->save();
-                return $objFeature;
             }
+
+            return $objFeature;
         }
+
+        return parent::processSave();
     }
 
     /**

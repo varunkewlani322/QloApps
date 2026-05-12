@@ -1700,19 +1700,25 @@ class HotelBookingDetail extends ObjectModel
         if (!$only_search_data) {
             if (!empty($bookingData)) {
                 foreach ($bookingData['rm_data'] as $key => $value) {
-                    $product_feature = Product::getFrontFeaturesStatic($context->language->id, $value['id_product']);
-                    $prod_amen = array();
+                    // featured amenities for display in room type list
+                    $product_feature = HotelRoomTypeAmenities::getAmenities(
+                        $value['id_product'],
+                        $context->language->id,
+                        true
+                    );
+                    // amenity category filter
                     if (!empty($amenities) && $amenities) {
-                        $prod_amen = $amenities;
-                        foreach ($product_feature as $a_key => $a_val) {
-                            if (($pa_key = array_search($a_val['id_feature'], $prod_amen)) !== false) {
-                                unset($prod_amen[$pa_key]);
-                                if (empty($prod_amen)) {
-                                    break;
-                                }
+                        $roomAmenityIds = HotelRoomTypeAmenities::getAmenityIds($value['id_product']);
+                        $allMatch = true;
+                        $objHotelAmenities = new HotelAmenities();
+                        foreach ($amenities as $categoryId) {
+                            $childIds = array_column($objHotelAmenities->getChildAmenitiesByParentAmenityId((int)$categoryId), 'id_htl_amenity');
+                            if (!array_intersect($roomAmenityIds, $childIds)) {
+                                $allMatch = false;
+                                break;
                             }
                         }
-                        if (!empty($prod_amen)) {
+                        if (!$allMatch) {
                             unset($bookingData['rm_data'][$key]);
                             continue;
                         }
