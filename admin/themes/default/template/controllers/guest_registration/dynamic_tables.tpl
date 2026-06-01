@@ -1,12 +1,23 @@
-{*
-* 2007-2017 PrestaShop
-*
+{**
 * NOTICE OF LICENSE
 *
-* This source file is subject to the Open Software License (OSL 3.0)
-* that is bundled with this package in the file LICENSE.txt.
+* This source file is subject to the Open Software License version 3.0
+* that is bundled with this package in the file LICENSE.md
 * It is also available through the world-wide-web at this URL:
-* http://opensource.org/licenses/osl-3.0.php
+* https://opensource.org/license/osl-3-0-php
+* If you did not receive a copy of the license and are unable to
+* obtain it through the world-wide-web, please send an email
+* to support@qloapps.com so we can send you a copy immediately.
+*
+* DISCLAIMER
+*
+* Do not edit or add to this file if you wish to upgrade this module to a newer
+* versions in the future. If you wish to customize this module for your needs
+* please refer to https://store.webkul.com/customisation-guidelines for more information.
+*
+* @author Webkul IN
+* @copyright Since 2010 Webkul
+* @license https://opensource.org/license/osl-3-0-php Open Software License version 3.0
 *}
 
 <form method="post" action="{$dynamic_form_action|escape:'html':'UTF-8'}" class="guest-registration-dynamic-form">
@@ -23,8 +34,11 @@
         </div>
         <div class="panel">
             <h3><i class="icon-plane"></i> {l s='Purpose of visit'}</h3>
-            {assign var=entity_name value='guest_reg_purpose'}
-            {assign var=entity_rows value=$guest_reg_purpose_rows}
+            {assign var=entity_name value='guest_visit_purpose'}
+            {assign var=entity_rows value=$guest_visit_purpose_rows}
+            {if isset($smarty.post.$entity_name) && is_array($smarty.post.$entity_name)}
+                {assign var=entity_rows value=$smarty.post.$entity_name}
+            {/if}
             <div class="table-responsive-row clearfix">
                 <table class="table dynamic-reg-table" data-entity="{$entity_name}">
                     <thead>
@@ -36,16 +50,16 @@
                         </tr>
                     </thead>
 	                    <tbody>
-	                        {foreach from=$entity_rows item=row}
+	                        {foreach from=$entity_rows key=rowKey item=row}
 	                            <tr class="dynamic-row">
 	                                <td style="display:none;">
-	                                    <input type="hidden" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][id]" value="{$row.id|intval}" />
+	                                    <input type="hidden" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][id]" value="{$row.id|intval}" />
 	                                </td>
 	                                <td class="dynamic-name-cell">
 	                                    {foreach from=$languages item=language}
 	                                        <div class="translatable-field row lang-{$language.id_lang}" {if $language.id_lang != $default_form_language}style="display:none;"{/if}>
 	                                            <div class="col-lg-{if $languages|count > 1}9{else}12{/if}">
-	                                                <input type="text" class="form-control" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][name][{$language.id_lang|intval}]" value="{$row.name[$language.id_lang]|default:''|escape:'html':'UTF-8'}" />
+	                                                <input type="text" class="form-control" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][name][{$language.id_lang|intval}]" value="{$row.name[$language.id_lang]|default:''|escape:'html':'UTF-8'}" />
 	                                            </div>
                                             {if $languages|count > 1}
                                             <div class="col-lg-2">
@@ -63,7 +77,7 @@
                                     {/foreach}
                                 </td>
 	                                <td class="text-center">
-	                                    <input type="hidden" class="dynamic-active-input" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][active]" value="{if $row.active}1{else}0{/if}" />
+	                                    <input type="hidden" class="dynamic-active-input" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][active]" value="{if $row.active}1{else}0{/if}" />
 	                                    <a href="#" class="dynamic-status-toggle list-action-enable {if $row.active}action-enabled{else}action-disabled{/if}" data-active="{if $row.active}1{else}0{/if}" title="{if $row.active}{l s='Enabled'}{else}{l s='Disabled'}{/if}">
 	                                        <i class="icon-check{if !$row.active} hidden{/if}"></i>
 	                                        <i class="icon-remove{if $row.active} hidden{/if}"></i>
@@ -119,13 +133,16 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-default add-dynamic-row" data-entity="{$entity_name}"><i class="icon-plus"></i> {l s='Add More'}</button>
+            <button type="button" class="btn btn-default add-dynamic-row" data-entity="{$entity_name}"><i class="icon-plus"></i> {l s='Add New field'}</button>
         </div>
 
         <div class="panel">
             <h3><i class="icon-file-text"></i> {l s='Identity proof'}</h3>
-            {assign var=entity_name value='guest_reg_id_proof'}
-            {assign var=entity_rows value=$guest_reg_id_proof_rows}
+            {assign var=entity_name value='reg_id_proof'}
+            {assign var=entity_rows value=$reg_id_proof_rows}
+            {if isset($smarty.post.$entity_name) && is_array($smarty.post.$entity_name)}
+                {assign var=entity_rows value=$smarty.post.$entity_name}
+            {/if}
             <div class="table-responsive-row clearfix">
                 <table class="table dynamic-reg-table" data-entity="{$entity_name}">
                     <thead>
@@ -137,16 +154,16 @@
                         </tr>
                     </thead>
 	                    <tbody>
-	                        {foreach from=$entity_rows item=row}
+	                        {foreach from=$entity_rows key=rowKey item=row}
 	                            <tr class="dynamic-row">
 	                                <td style="display:none;">
-	                                    <input type="hidden" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][id]" value="{$row.id|intval}" />
+	                                    <input type="hidden" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][id]" value="{$row.id|intval}" />
 	                                </td>
 	                                <td class="dynamic-name-cell">
 	                                    {foreach from=$languages item=language}
 	                                        <div class="translatable-field row lang-{$language.id_lang}" {if $language.id_lang != $default_form_language}style="display:none;"{/if}>
 	                                            <div class="col-lg-{if $languages|count > 1}9{else}12{/if}">
-	                                                <input type="text" class="form-control" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][name][{$language.id_lang|intval}]" value="{$row.name[$language.id_lang]|default:''|escape:'html':'UTF-8'}" />
+	                                                <input type="text" class="form-control" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][name][{$language.id_lang|intval}]" value="{$row.name[$language.id_lang]|default:''|escape:'html':'UTF-8'}" />
 	                                            </div>
                                             {if $languages|count > 1}
                                             <div class="col-lg-2">
@@ -164,7 +181,7 @@
                                     {/foreach}
                                 </td>
 	                                <td class="text-center">
-	                                    <input type="hidden" class="dynamic-active-input" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][active]" value="{if $row.active}1{else}0{/if}" />
+	                                    <input type="hidden" class="dynamic-active-input" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][active]" value="{if $row.active}1{else}0{/if}" />
 	                                    <a href="#" class="dynamic-status-toggle list-action-enable {if $row.active}action-enabled{else}action-disabled{/if}" data-active="{if $row.active}1{else}0{/if}" title="{if $row.active}{l s='Enabled'}{else}{l s='Disabled'}{/if}">
 	                                        <i class="icon-check{if !$row.active} hidden{/if}"></i>
 	                                        <i class="icon-remove{if $row.active} hidden{/if}"></i>
@@ -220,13 +237,16 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-default add-dynamic-row" data-entity="{$entity_name}"><i class="icon-plus"></i> {l s='Add More'}</button>
+            <button type="button" class="btn btn-default add-dynamic-row" data-entity="{$entity_name}"><i class="icon-plus"></i> {l s='Add New field'}</button>
         </div>
 
         <div class="panel">
             <h3><i class="icon-credit-card"></i> {l s='Payment method'}</h3>
             {assign var=entity_name value='guest_reg_payment_method'}
             {assign var=entity_rows value=$guest_reg_payment_method_rows}
+            {if isset($smarty.post.$entity_name) && is_array($smarty.post.$entity_name)}
+                {assign var=entity_rows value=$smarty.post.$entity_name}
+            {/if}
             <div class="table-responsive-row clearfix">
                 <table class="table dynamic-reg-table" data-entity="{$entity_name}">
                     <thead>
@@ -238,16 +258,16 @@
                         </tr>
                     </thead>
 	                    <tbody>
-	                        {foreach from=$entity_rows item=row}
+	                        {foreach from=$entity_rows key=rowKey item=row}
 	                            <tr class="dynamic-row">
 	                                <td style="display:none;">
-	                                    <input type="hidden" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][id]" value="{$row.id|intval}" />
+	                                    <input type="hidden" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][id]" value="{$row.id|intval}" />
 	                                </td>
 	                                <td class="dynamic-name-cell">
 	                                    {foreach from=$languages item=language}
 	                                        <div class="translatable-field row lang-{$language.id_lang}" {if $language.id_lang != $default_form_language}style="display:none;"{/if}>
 	                                            <div class="col-lg-{if $languages|count > 1}9{else}12{/if}">
-	                                                <input type="text" class="form-control" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][name][{$language.id_lang|intval}]" value="{$row.name[$language.id_lang]|default:''|escape:'html':'UTF-8'}" />
+	                                                <input type="text" class="form-control" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][name][{$language.id_lang|intval}]" value="{$row.name[$language.id_lang]|default:''|escape:'html':'UTF-8'}" />
 	                                            </div>
                                             {if $languages|count > 1}
                                             <div class="col-lg-2">
@@ -265,7 +285,7 @@
                                     {/foreach}
                                 </td>
 	                                <td class="text-center">
-	                                    <input type="hidden" class="dynamic-active-input" name="{$entity_name}[{$row.form_key|default:$row.id|escape:'html':'UTF-8'}][active]" value="{if $row.active}1{else}0{/if}" />
+	                                    <input type="hidden" class="dynamic-active-input" name="{$entity_name}[{$rowKey|escape:'html':'UTF-8'}][active]" value="{if $row.active}1{else}0{/if}" />
 	                                    <a href="#" class="dynamic-status-toggle list-action-enable {if $row.active}action-enabled{else}action-disabled{/if}" data-active="{if $row.active}1{else}0{/if}" title="{if $row.active}{l s='Enabled'}{else}{l s='Disabled'}{/if}">
 	                                        <i class="icon-check{if !$row.active} hidden{/if}"></i>
 	                                        <i class="icon-remove{if $row.active} hidden{/if}"></i>
@@ -321,7 +341,7 @@
                     </tbody>
                 </table>
             </div>
-            <button type="button" class="btn btn-default add-dynamic-row" data-entity="{$entity_name}"><i class="icon-plus"></i> {l s='Add More'}</button>
+            <button type="button" class="btn btn-default add-dynamic-row" data-entity="{$entity_name}"><i class="icon-plus"></i> {l s='Add New field'}</button>
         </div>
 
         <div class="panel-footer">
