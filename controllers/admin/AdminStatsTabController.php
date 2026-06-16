@@ -151,30 +151,46 @@ abstract class AdminStatsTabControllerCore extends AdminPreferencesControllerCor
         $tpl = $this->createTemplate('menu.tpl');
 
         $modules = $this->getModules();
-        $module_instance = array();
-        $module_tabs = array();
+
+        // Keyed by module name. Each entry holds display_name and optionally tabs.
+        // tabs is populated only if the module implements getStatsTabs(), returning:
+        //   array( 'tab_key' => ['key' => 'tab_key', 'label' => 'Label'], ... )
+        // 'key' maps to the `tab` GET param; read in hookAdminStatsModules() to render the correct report.
+        $statsTabs = array();
         foreach ($modules as $m => $module) {
-            if ($module_instance[$module['name']] = Module::getInstanceByName($module['name'])) {
-                $modules[$m]['displayName'] = $module_instance[$module['name']]->displayName;
-                if (method_exists($module_instance[$module['name']], 'getStatsTabs')) {
-                    $module_tabs[$module['name']] = $module_instance[$module['name']]->getStatsTabs();
+            if ($moduleObj = Module::getInstanceByName($module['name'])) {
+                $modules[$m]['displayName'] = $moduleObj->displayName;
+                $statsTabs[$module['name']] = array('display_name' => $moduleObj->displayName);
+                if (method_exists($moduleObj, 'getStatsTabs')) {
+                    $statsTabs[$module['name']]['tabs'] = $moduleObj->getStatsTabs();
                 }
             } else {
-                unset($module_instance[$module['name']]);
+                unset($statsTabs[$module['name']]);
                 unset($modules[$m]);
             }
         }
+
+        Hook::exec('actionStatsTabsModifier', array(
+            'stats_tabs' => &$statsTabs
+        ));
 
         uasort($modules, array($this, 'checkModulesNames'));
 
         $tpl->assign(array(
             'current' => self::$currentIndex,
             'current_module_name' => Tools::getValue('module', 'statsforecast'),
+<<<<<<< HEAD
             'current_tab' => Tools::getValue('tab', ''),
             'token' => $this->token,
             'modules' => $modules,
             'module_instance' => $module_instance,
             'module_tabs' => $module_tabs,
+=======
+            'current_tab' => Tools::getValue('tab', ''), // active sub-tab key
+            'token' => $this->token,
+            'modules' => $modules,
+            'module_tabs' => $statsTabs,
+>>>>>>> gli-3034
         ));
 
         return $tpl->fetch();
