@@ -64,6 +64,7 @@ class AdminPdfControllerCore extends AdminController
         }
     }
 
+<<<<<<< HEAD
     public function processGenerateBookingVoucherPDF()
     {
         if (Tools::isSubmit('id_order')) {
@@ -73,9 +74,12 @@ class AdminPdfControllerCore extends AdminController
         }
     }
     public function processGenerateRegistrationFormPDF()
+=======
+    public function processGenerateGuestRegistrationFormPDF()
+>>>>>>> gli-407
     {
         if (Tools::isSubmit('id_order')) {
-            $this->generateRegistrationFormPDFByIdOrder(Tools::getValue('id_order'));
+            $this->generateGuestRegistrationFormPDFByIdOrder(Tools::getValue('id_order'));
         } else {
             die(Tools::displayError('The order ID is missing.'));
         }
@@ -242,22 +246,7 @@ class AdminPdfControllerCore extends AdminController
         $this->generatePDF($order_invoice, PDF::TEMPLATE_INVOICE);
     }
 
-    public function generateBookingVoucherPDFByIdOrder($id_order)
-    {
-        $order = new Order((int)$id_order);
-        if (!Validate::isLoadedObject($order)) {
-            die(Tools::displayError('The order cannot be found within your database.'));
-        }        $objHotelBookingDetail = new HotelBookingDetail();
-        $bookingDetails = $objHotelBookingDetail->getBookingDataByOrderId((int)$order->id);
-        if (empty($bookingDetails)) {
-            die(Tools::displayError('No booking voucher is available for this order.'));
-        }
-
-        $pdf = new PDF($order, PDF::TEMPLATE_BOOKING_VOUCHER, Context::getContext()->smarty);
-        $pdf->render('I');
-    }
-
-    public function generateRegistrationFormPDFByIdOrder($id_order)
+    public function generateGuestRegistrationFormPDFByIdOrder($id_order)
     {
         $order = new Order((int)$id_order);
         if (!Validate::isLoadedObject($order)) {
@@ -268,11 +257,11 @@ class AdminPdfControllerCore extends AdminController
             die(Tools::displayError('The registration form cannot be generated for this order.'));
         }
 
-        $pdf = new PDF($order, PDF::TEMPLATE_REGISTRATION_FORM, Context::getContext()->smarty);
+        $pdf = new PDF($order, PDF::TEMPLATE_GUEST_REGISTRATION_FORM, Context::getContext()->smarty);
         $pdf->render('I');
     }
 
-    public function generateRegistrationFormPDFByRoom($id_order, $id_hotel_booking_detail)
+    public function generateGuestRegistrationFormPDFByRoom($id_order, $id_hotel_booking_detail)
     {
         $order = new Order((int)$id_order);
         if (!Validate::isLoadedObject($order)) {
@@ -283,7 +272,7 @@ class AdminPdfControllerCore extends AdminController
             die(Tools::displayError('The registration form cannot be generated for this order.'));
         }
 
-        $pdf = new PDF($order, PDF::TEMPLATE_REGISTRATION_FORM, Context::getContext()->smarty, $id_hotel_booking_detail);
+        $pdf = new PDF($order, PDF::TEMPLATE_GUEST_REGISTRATION_FORM, Context::getContext()->smarty, $id_hotel_booking_detail);
         $pdf->render('I');
     }
 
