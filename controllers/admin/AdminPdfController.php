@@ -64,6 +64,15 @@ class AdminPdfControllerCore extends AdminController
         }
     }
 
+    public function processGenerateBookingVoucherPDF()
+    {
+        if (Tools::isSubmit('id_order')) {
+            $this->generateBookingVoucherPDFByIdOrder(Tools::getValue('id_order'));
+        } else {
+            die(Tools::displayError('The order ID is missing.'));
+        }
+    }
+
     public function processGenerateGuestRegistrationFormPDF()
     {
         if (Tools::isSubmit('id_order')) {
