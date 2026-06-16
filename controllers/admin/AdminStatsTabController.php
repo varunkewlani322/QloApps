@@ -179,18 +179,10 @@ abstract class AdminStatsTabControllerCore extends AdminPreferencesControllerCor
         $tpl->assign(array(
             'current' => self::$currentIndex,
             'current_module_name' => Tools::getValue('module', 'statsforecast'),
-<<<<<<< HEAD
-            'current_tab' => Tools::getValue('tab', ''),
-            'token' => $this->token,
-            'modules' => $modules,
-            'module_instance' => $module_instance,
-            'module_tabs' => $module_tabs,
-=======
             'current_tab' => Tools::getValue('tab', ''), // active sub-tab key
             'token' => $this->token,
             'modules' => $modules,
             'module_tabs' => $statsTabs,
->>>>>>> gli-3034
         ));
 
         return $tpl->fetch();

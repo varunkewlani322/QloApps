@@ -64,19 +64,7 @@ class AdminPdfControllerCore extends AdminController
         }
     }
 
-<<<<<<< HEAD
-    public function processGenerateBookingVoucherPDF()
-    {
-        if (Tools::isSubmit('id_order')) {
-            $this->generateBookingVoucherPDFByIdOrder(Tools::getValue('id_order'));
-            } else {
-            die(Tools::displayError('The order ID is missing.'));
-        }
-    }
-    public function processGenerateRegistrationFormPDF()
-=======
     public function processGenerateGuestRegistrationFormPDF()
->>>>>>> gli-407
     {
         if (Tools::isSubmit('id_order')) {
             $this->generateGuestRegistrationFormPDFByIdOrder(Tools::getValue('id_order'));
