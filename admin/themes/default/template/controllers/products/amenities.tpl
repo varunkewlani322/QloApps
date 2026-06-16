@@ -44,17 +44,54 @@
 			</div>
 		</div>
 
-		<div class="form-group">
-			<label class="control-label col-sm-3">
-				<span class="label-tooltip" data-toggle="tooltip" data-original-title="{l s='Select which of the chosen amenities should be featured for this room type.'}">
-					{l s='Featured amenities'}
-				</span>
-			</label>
-			<div class="col-sm-5">
-				<select name="featured_amenities[]" id="rt_featured_amenities" class="form-control chosen" multiple>
-				</select>
+		{if isset($selected_amenities)}
+			<div class="form-group">
+				<label class="control-label col-sm-3">
+					<span class="label-tooltip" data-toggle="tooltip" data-original-title="{l s='Select which of the chosen amenities should be featured for this room type.'}">
+						{l s='Featured amenities'}
+					</span>
+				</label>
+				<div class="col-sm-5">
+					<select name="featured_amenities[]" id="rt_featured_amenities" class="form-control" multiple>
+						{foreach $selected_amenities as $amenity}
+							<option value="{$amenity.id|intval}"{if $amenity.is_featured} selected="selected"{/if}>{$amenity.name|escape:'htmlall':'UTF-8'}</option>
+						{/foreach}
+					</select>
+				</div>
 			</div>
-		</div>
+			<script type="text/javascript">
+			(function ($) {
+				var $select = $('#rt_featured_amenities');
+
+				function syncSelect() {
+					$select.find('option').each(function () {
+						if (!$('input[name="room_type_amenities[]"][value="' + $(this).val() + '"]').is(':checked')) {
+							$(this).remove();
+						}
+					});
+					$('input[name="room_type_amenities[]"]:checked').each(function () {
+						if (!$select.find('option[value="' + $(this).val() + '"]').length) {
+							$select.append($('<option>').val($(this).val()).text($(this).siblings('label.tree-toggler').text().trim()));
+						}
+					});
+					$select.trigger('chosen:updated');
+				}
+
+				$(document).on('click', '#room-type-amenities-tree :checkbox', function () {
+					setTimeout(syncSelect, 0);
+				});
+				$(document).on('click', '#check-all-room-type-amenities-tree, #uncheck-all-room-type-amenities-tree', function () {
+					setTimeout(syncSelect, 0);
+				});
+
+				setTimeout(function () {
+					if (!$select.hasClass('chzn-done')) {
+						$select.chosen({ disable_search_threshold: 5, search_contains: true });
+					}
+				}, 0);
+			}(jQuery));
+			</script>
+		{/if}
 	{else}
 		<div class="alert alert-warning">
 			<i class="icon-warning-sign"></i> {l s='No amenities have been defined yet.'}
@@ -67,50 +104,4 @@
 		<button type="submit" name="submitAddproductAndStay" class="btn btn-default pull-right" disabled="disabled"><i class="process-icon-loading"></i> {l s='Save and stay'}</button>
 	</div>
 </div>
-
-{if isset($featured_amenity_ids)}
-<script type="text/javascript">
-(function ($) {
-	var featuredIds = {$featured_amenity_ids|json_encode};
-	var $select = $('#rt_featured_amenities');
-
-	function syncFeaturedSelect() {
-		var existing = {};
-		$select.find('option').each(function () {
-			existing[$(this).val()] = true;
-		});
-
-		$('input[name="room_type_amenities[]"]').each(function () {
-			var $cb = $(this);
-			var id = $cb.val();
-			var name = $cb.siblings('label.tree-toggler').text().trim();
-			if ($cb.is(':checked')) {
-				if (!existing[id]) {
-					var selected = featuredIds.indexOf(parseInt(id)) !== -1;
-					$select.append(
-						$('<option></option>').val(id).text(name).prop('selected', selected)
-					);
-				}
-			} else {
-				$select.find('option[value="' + id + '"]').remove();
-			}
-		});
-
-		$select.trigger('chosen:updated');
-	}
-
-	$(document).on('click', '#room-type-amenities-tree :input[type="checkbox"]', function () {
-		setTimeout(syncFeaturedSelect, 0);
-	});
-
-	$(document).on('click', '#check-all-room-type-amenities-tree, #uncheck-all-room-type-amenities-tree', function () {
-		setTimeout(syncFeaturedSelect, 0);
-	});
-
-	$(document).ready(function () {
-		syncFeaturedSelect();
-	});
-}(jQuery));
-</script>
-{/if}
 {/if}

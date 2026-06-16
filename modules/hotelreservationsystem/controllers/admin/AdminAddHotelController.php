@@ -206,7 +206,14 @@ class AdminAddHotelController extends ModuleAdminController
                     ->setUseSearch(true);
                 $treeContent = $tree->render();
                 $smartyVars['hotel_amenity_tree'] = $treeContent;
-                $smartyVars['hotel_featured_amenity_ids'] = HotelBranchAmenities::getFeaturedAmenityIds((int)$idHotel);
+
+                $hotelFeaturedIds = HotelBranchAmenities::getFeaturedAmenityIds((int)$idHotel);
+                $hotelSelectedAmenities = HotelBranchAmenities::getAmenities((int)$idHotel);
+                foreach ($hotelSelectedAmenities as &$amenity) {
+                    $amenity['is_featured'] = in_array((int)$amenity['id'], $hotelFeaturedIds);
+                }
+                unset($amenity);
+                $smartyVars['hotel_selected_amenities'] = $hotelSelectedAmenities;
             }
 
             $smartyVars['rewrite_url'] = [];

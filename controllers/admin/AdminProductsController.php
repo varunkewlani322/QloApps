@@ -5029,7 +5029,14 @@ class AdminProductsControllerCore extends AdminController
                         ->setUseSearch(true)
                         ->setHeaderTemplate('tree_header_room.tpl');
                     $data->assign('room_type_amenities_tree', $tree->render());
-                    $data->assign('featured_amenity_ids', HotelRoomTypeAmenities::getFeaturedAmenityIds((int)$obj->id));
+
+                    $featuredIds = HotelRoomTypeAmenities::getFeaturedAmenityIds((int)$obj->id);
+                    $selectedAmenities = HotelRoomTypeAmenities::getAmenities((int)$obj->id);
+                    foreach ($selectedAmenities as &$amenity) {
+                        $amenity['is_featured'] = in_array((int)$amenity['id'], $featuredIds);
+                    }
+                    unset($amenity);
+                    $data->assign('selected_amenities', $selectedAmenities);
                 }
             } else {
                 $this->displayWarning($this->l('You must save the room type in this shop before adding amenities.'));
