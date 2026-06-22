@@ -243,6 +243,23 @@ class AdminPdfControllerCore extends AdminController
         $this->generatePDF($order_invoice, PDF::TEMPLATE_INVOICE);
     }
 
+    public function generateBookingVoucherPDFByIdOrder($id_order)
+    {
+        $order = new Order((int)$id_order);
+        if (!Validate::isLoadedObject($order)) {
+            die(Tools::displayError('The order cannot be found within your database.'));
+        }
+
+        $objHotelBookingDetail = new HotelBookingDetail();
+        $bookingDetails = $objHotelBookingDetail->getBookingDataByOrderId((int)$order->id);
+        if (empty($bookingDetails)) {
+            die(Tools::displayError('No booking voucher is available for this order.'));
+        }
+
+        $pdf = new PDF($order, PDF::TEMPLATE_BOOKING_VOUCHER, Context::getContext()->smarty);
+        $pdf->render('I');
+    }
+
     public function generateGuestRegistrationFormPDFByIdOrder($id_order)
     {
         $order = new Order((int)$id_order);
