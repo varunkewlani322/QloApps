@@ -610,6 +610,14 @@
 				</div>
 				<div class="tab-pane" id="hotel-features">
 					{hook h='displayAdminAddHotelFormFeaturesTabBefore' id_hotel=$hook_arg_id_hotel}
+					<div class="alert alert-info">
+						<p>{l s='If you want to add a new amenity, please use the following link.'}
+							<a href="{$link->getAdminLink('AdminHotelAmenities')|escape:'html':'UTF-8'}" class="btn btn-link button" target="_blank">
+								<i class="icon-plus-sign"></i> {l s='Manage amenities'} <i class="icon-external-link-sign"></i>
+							</a>
+						</p>
+						{l s='Select the amenities available for this hotel using the tree below.'}
+					</div>
 					{if isset($hotel_amenity_tree)}
 						<div class="form-group">
 							<label for="hotel_amenity" class="control-label col-sm-3">
@@ -625,7 +633,7 @@
 								<label class="control-label col-sm-3">
 									<span title="" data-toggle="tooltip" class="label-tooltip" data-original-title='{l s='Select which of the chosen amenities should be featured for this hotel.' mod='hotelreservationsystem'}'>{l s='Featured amenities' mod='hotelreservationsystem'}</span>
 								</label>
-								<div class="col-sm-5">
+								<div class="col-sm-7">
 									<select name="hotel_featured_amenities[]" id="htl_featured_amenities" class="form-control" multiple>
 										{foreach $hotel_selected_amenities as $amenity}
 											<option value="{$amenity.id|intval}"{if $amenity.is_featured} selected="selected"{/if}>{$amenity.name|escape:'htmlall':'UTF-8'}</option>
