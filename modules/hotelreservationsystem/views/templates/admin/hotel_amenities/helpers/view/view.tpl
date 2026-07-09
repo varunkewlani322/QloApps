@@ -72,7 +72,7 @@
 													{elseif $amenity.logo_type == 'image' && $amenity.logo}
 														<img src="{$img_base_url}{$amenity.id}.jpg"
 															 alt="{$amenity.name|escape:'htmlall':'UTF-8'}"
-															 style="max-height:32px;max-width:32px;" />
+															 class="htl-amenity-logo-img" />
 													{else}
 														&mdash;
 													{/if}
@@ -80,7 +80,7 @@
 												<td>{$amenity.name|escape:'htmlall':'UTF-8'}</td>
 												<td class="text-center">
 													<a class="list-action-enable{if $amenity.active} action-enabled{else} action-disabled{/if}"
-													   href="{$admin_link}&amp;id_htl_amenity={$amenity.id|intval}&amp;statushtl_amenity&amp;token={$token|escape:'htmlall':'UTF-8'}"
+													   href="{$admin_link}&amp;id_amenity={$amenity.id|intval}&amp;statushtl_amenity&amp;token={$token|escape:'htmlall':'UTF-8'}"
 													   title="{if $amenity.active}{l s='Enabled' mod='hotelreservationsystem'}{else}{l s='Disabled' mod='hotelreservationsystem'}{/if}">
 														<i class="icon-check{if !$amenity.active} hidden{/if}"></i>
 														<i class="icon-remove{if $amenity.active} hidden{/if}"></i>
@@ -124,58 +124,7 @@
 
 {strip}
 	{addJsDef delete_url=$admin_link js=1 mod='hotelreservationsystem'}
+	{addJsDef htlAmenityToken=$token mod='hotelreservationsystem'}
 	{addJsDefL name=confirm_delete_msg}{l s='Are you sure you want to delete this? This action cannot be undone.' js=1 mod='hotelreservationsystem'}{/addJsDefL}
 	{addJsDefL name=error_delete_msg}{l s='An error occurred while deleting. Please try again.' js=1 mod='hotelreservationsystem'}{/addJsDefL}
 {/strip}
-
-<script type="text/javascript">
-(function ($) {
-	$(document).on('click', '.htl-delete-category', function (e) {
-		e.preventDefault();
-		if (!confirm(confirm_delete_msg)) { return; }
-		var $btn = $(this);
-		$.ajax({
-			url: delete_url,
-			type: 'POST',
-			data: {
-				ajax: 1,
-				action: 'DeleteCategory',
-				id_category: $btn.data('category-id'),
-				token: '{$token|escape:'javascript'}'
-			},
-			success: function (res) {
-				var r = $.parseJSON(res);
-				if (r.status) {
-					window.location = delete_url + '&conf=1';
-				} else {
-					alert(r.msg || error_delete_msg);
-				}
-			}
-		});
-	});
-
-	$(document).on('click', '.htl-delete-amenity', function (e) {
-		e.preventDefault();
-		if (!confirm(confirm_delete_msg)) { return; }
-		var $btn = $(this);
-		$.ajax({
-			url: delete_url,
-			type: 'POST',
-			data: {
-				ajax: 1,
-				action: 'DeleteAmenityItem',
-				id_amenity: $btn.data('amenity-id'),
-				token: '{$token|escape:'javascript'}'
-			},
-			success: function (res) {
-				var r = $.parseJSON(res);
-				if (r.status) {
-					window.location = delete_url + '&conf=1';
-				} else {
-					alert(r.msg || error_delete_msg);
-				}
-			}
-		});
-	});
-}(jQuery));
-</script>

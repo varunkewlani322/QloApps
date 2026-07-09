@@ -32,7 +32,7 @@ class HotelRoomTypeAmenities extends ObjectModel
 
     public static $definition = array(
         'table'   => 'htl_room_type_amenity',
-        'primary' => 'id_htl_room_type_amenity',
+        'primary' => 'id_room_type_amenity',
         'fields'  => array(
             'id_product'  => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
             'amenity_id'  => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId'),
@@ -43,62 +43,86 @@ class HotelRoomTypeAmenities extends ObjectModel
     );
 
     /**
-     * @param int $idProduct
-     * @return array
-     */
-    public static function getAmenityIds($idProduct): array
-    {
-        $rows = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
-            'SELECT `amenity_id`
-            FROM `'._DB_PREFIX_.'htl_room_type_amenity`
-            WHERE `id_product` = '.(int)$idProduct
-        );
-
-        return $rows ? array_map('intval', array_column($rows, 'amenity_id')) : array();
-    }
-
-    /**
-     * @param int $idProduct
-     * @return array amenity IDs where is_featured = 1
-     */
-    public static function getFeaturedAmenityIds($idProduct): array
-    {
-        $rows = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
-            'SELECT `amenity_id`
-            FROM `'._DB_PREFIX_.'htl_room_type_amenity`
-            WHERE `id_product` = '.(int)$idProduct.'
-                AND `is_featured` = 1'
-        );
-
-        return $rows ? array_map('intval', array_column($rows, 'amenity_id')) : array();
-    }
-
-    /**
      * @param int  $idProduct
      * @param int  $idLang       defaults to current context language
      * @param bool $featuredOnly true = is_featured=1 only; false = all active child amenities
      * @return array
      */
-    public static function getAmenities($idProduct, $idLang = 0, $featuredOnly = false): array
+    public static function getAmenities($idProduct, $idLang = 0, $featuredOnly = false)
     {
         if (!$idLang) {
             $idLang = Context::getContext()->language->id;
         }
 
-        $filter = $featuredOnly ? 'AND hrta.`is_featured` = 1' : 'AND ha.`parent_amenity_id` > 0';
+        $filter = $featuredOnly ? 'AND hrta.`is_featured` = 1' : 'AND ha.`id_parent` > 0';
 
         return Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
-            'SELECT ha.`id_htl_amenity` AS `id`, ha.`logo_type`, ha.`logo`, hal.`name`
+            'SELECT ha.`id_amenity` AS `id`, ha.`logo_type`, ha.`logo`, hal.`name`, hrta.`is_featured`
             FROM `'._DB_PREFIX_.'htl_room_type_amenity` hrta
             INNER JOIN `'._DB_PREFIX_.'htl_amenity` ha
-                ON (ha.`id_htl_amenity` = hrta.`amenity_id`)
+                ON (ha.`id_amenity` = hrta.`amenity_id`)
             INNER JOIN `'._DB_PREFIX_.'htl_amenity_lang` hal
-                ON (hal.`id_htl_amenity` = hrta.`amenity_id` AND hal.`id_lang` = '.(int)$idLang.')
+                ON (hal.`id_amenity` = hrta.`amenity_id` AND hal.`id_lang` = '.(int)$idLang.')
             WHERE hrta.`id_product` = '.(int)$idProduct.'
                 AND ha.`active` = 1
                 '.$filter.'
             ORDER BY ha.`position` ASC, hal.`name` ASC'
         ) ?: array();
+    }
+
+    /**
+     * @param int $idProduct
+     * @return bool
+     */
+    public static function deleteByProduct($idProduct)
+    {
+        return (bool)Db::getInstance()->delete('htl_room_type_amenity', '`id_product` = '.(int)$idProduct);
+    }
+
+    /**
+     * Prepare amenities tree data for a room type form, with selection state.
+     *
+     * @param int $idProduct
+     * @param int $idLang defaults to current context language
+     * @return array
+     */
+    public static function getRoomTypeAmenitiesData($idProduct, $idLang = 0)
+    {
+        if (!$idLang) {
+            $idLang = Context::getContext()->language->id;
+        }
+
+        $objHotelAmenities = new HotelAmenities();
+        $amenities = $objHotelAmenities->hotelBranchSelectedAmenitiesArray(
+            array_column(self::getAmenities($idProduct), 'id'),
+            $idLang
+        );
+
+        if (!$amenities) {
+            return array();
+        }
+
+        foreach ($amenities as $idAmenityGroup => &$amenityGroup) {
+            $amenityGroup['value'] = (int) $idAmenityGroup;
+            $amenityGroup['input_name'] = 'room_type_amenity_parents';
+
+            $selectedAmenities = 0;
+            if (!empty($amenityGroup['children'])) {
+                foreach ($amenityGroup['children'] as &$amenity) {
+                    $amenity['value'] = (int) $amenity['id'];
+                    $amenity['input_name'] = 'room_type_amenities';
+                    if (!empty($amenity['selected'])) {
+                        ++$selectedAmenities;
+                    }
+                }
+
+                if ($selectedAmenities === count($amenityGroup['children'])) {
+                    $amenityGroup['selected'] = true;
+                }
+            }
+        }
+
+        return $amenities;
     }
 
     /**
@@ -109,18 +133,18 @@ class HotelRoomTypeAmenities extends ObjectModel
      * @param array $featuredIds amenity IDs that should be marked is_featured=1
      * @return bool
      */
-    public function saveRoomTypeAmenities($idProduct, array $amenityIds, array $featuredIds = array()): bool
+    public function saveRoomTypeAmenities($idProduct, array $amenityIds, array $featuredIds = array())
     {
-        Db::getInstance()->delete('htl_room_type_amenity', '`id_product` = '.(int)$idProduct);
+        static::deleteByProduct($idProduct);
 
         $featuredSet = array_flip(array_map('intval', $featuredIds));
 
         foreach (array_unique(array_filter(array_map('intval', $amenityIds))) as $amenityId) {
-            $obj = new self();
-            $obj->id_product  = (int)$idProduct;
-            $obj->amenity_id  = (int)$amenityId;
-            $obj->is_featured = isset($featuredSet[$amenityId]) ? 1 : 0;
-            if (!$obj->save()) {
+            $objHotelRoomTypeAmenities = new self();
+            $objHotelRoomTypeAmenities->id_product  = (int)$idProduct;
+            $objHotelRoomTypeAmenities->amenity_id  = (int)$amenityId;
+            $objHotelRoomTypeAmenities->is_featured = isset($featuredSet[$amenityId]) ? 1 : 0;
+            if (!$objHotelRoomTypeAmenities->save()) {
                 return false;
             }
         }
