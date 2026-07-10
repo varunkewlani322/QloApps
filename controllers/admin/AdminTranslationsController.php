@@ -1317,6 +1317,12 @@ class AdminTranslationsControllerCore extends AdminController
                 'dir' => _PS_TRANSLATIONS_DIR_.$this->lang_selected->iso_code.'/',
                 'file' => 'pdf.php'
             ),
+            'class' => array(
+                'name' => $this->l('System translations'),
+                'var' => '_LANGCLASS',
+                'dir' => _PS_TRANSLATIONS_DIR_.$this->lang_selected->iso_code.'/',
+                'file' => 'class.php'
+            ),
             'mails' => array(
                 'name' => $this->l('Email templates translations'),
                 'var' => '_LANGMAIL',
@@ -1802,6 +1808,68 @@ class AdminTranslationsControllerCore extends AdminController
             'limit_warning' => $this->displayLimitPostWarning($count),
             'mod_security_warning' => Tools::apacheModExists('mod_security'),
             'tabsArray' => $tabs_array,
+        ));
+
+        $this->initToolbar();
+        $this->base_tpl_view = 'translation_form.tpl';
+        return parent::renderView();
+    }
+
+    /**
+     * This method generate the form for core class files translations
+     */
+    public function initFormClass()
+    {
+        $name_var = $this->translations_informations[$this->type_selected]['var'];
+        $GLOBALS[$name_var] = $this->fileExists();
+        $missing_translations = array();
+        $missing_translations_found = array();
+        $tabs_array = array();
+
+        $files_per_directory = $this->getFileToParseByTypeTranslation();
+
+        foreach ($files_per_directory['php'] as $dir => $files) {
+            foreach ($files as $file) {
+                if (preg_match('/^(.*)\.php$/', $file) && Tools::file_exists_cache($file_path = $dir.$file) && !in_array($file, Translate::$ignore_folder)) {
+                    $prefix_key = basename($file, '.php');
+
+                    $content = file_get_contents($file_path);
+                    $matches = Translate::userParseFile($content, $this->type_selected, 'php');
+
+                    foreach ($matches as $key) {
+                        if (isset($GLOBALS[$name_var][$prefix_key.md5($key)])) {
+                            $tabs_array[$prefix_key][$key]['trad'] = stripslashes(html_entity_decode($GLOBALS[$name_var][$prefix_key.md5($key)], ENT_COMPAT, 'UTF-8'));
+                        } else {
+                            if (!isset($tabs_array[$prefix_key][$key]['trad'])) {
+                                $tabs_array[$prefix_key][$key]['trad'] = '';
+                                if (!isset($missing_translations[$prefix_key])) {
+                                    $missing_translations[$prefix_key] = 1;
+                                    $missing_translations_found[$prefix_key] = array();
+                                    $missing_translations_found[$prefix_key][] = $key;
+                                } elseif (!in_array($key, $missing_translations_found[$prefix_key])) {
+                                    $missing_translations[$prefix_key]++;
+                                    $missing_translations_found[$prefix_key][] = $key;
+                                }
+                            }
+                        }
+                        $tabs_array[$prefix_key][$key]['use_sprintf'] = Translate::checkIfKeyUseSprintf($key);
+                    }
+                }
+            }
+        }
+
+        $count = 0;
+        foreach ($tabs_array as $array) {
+            $count += count($array);
+        }
+
+        $this->tpl_view_vars = array_merge($this->tpl_view_vars, array(
+            'count' => $count,
+            'cancel_url' => $this->context->link->getAdminLink('AdminTranslations'),
+            'limit_warning' => $this->displayLimitPostWarning($count),
+            'mod_security_warning' => Tools::apacheModExists('mod_security'),
+            'tabsArray' => $tabs_array,
+            'missing_translations' => $missing_translations
         ));
 
         $this->initToolbar();

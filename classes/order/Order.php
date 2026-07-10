@@ -46,6 +46,85 @@ class OrderCore extends ObjectModel
     const ORDER_COMPLETE_CANCELLATION_FLAG = 2;
     const ORDER_COMPLETE_CANCELLATION_OR_REFUND_REQUEST_FLAG = 3;
 
+    // Guest Registration Card — Section IDs
+    const GRC_SECTION_GUEST_INFO          = 1;
+    const GRC_SECTION_TRAVEL_INFO         = 2;
+    const GRC_SECTION_BOOKING_INFO        = 3;
+    const GRC_SECTION_IDENTIFICATION      = 4;
+    const GRC_SECTION_ADDITIONAL_GUESTS   = 5;
+    const GRC_SECTION_BILLING_CORPORATE   = 6;
+    const GRC_SECTION_PAYMENT_DEPOSIT     = 7;
+    const GRC_SECTION_GUEST_SIGNATURE     = 8;
+    const GRC_SECTION_PROPERTY_REGS       = 9;
+    const GRC_SECTION_OFFICE_USE_ONLY     = 10;
+
+    // Guest Registration Card — Guest Information fields (section 1)
+    const GRC_GUEST_TITLE                 = 1;
+    const GRC_GUEST_FULL_NAME             = 2;
+    const GRC_GUEST_PHONE                 = 3;
+    const GRC_GUEST_EMAIL                 = 4;
+    const GRC_GUEST_DOB                   = 5;
+    const GRC_GUEST_NATIONALITY           = 6;
+    const GRC_GUEST_CITY_COUNTRY          = 7;
+    const GRC_GUEST_POSTAL_CODE           = 8;
+    const GRC_GUEST_ADDRESS               = 9;
+
+    // Guest Registration Card — Travel Information fields (section 2)
+    const GRC_TRAVEL_ARRIVED_FROM         = 1;
+    const GRC_TRAVEL_NEXT_DESTINATION     = 2;
+    const GRC_TRAVEL_FLIGHT_TRAIN         = 3;
+    const GRC_TRAVEL_VEHICLE_REG          = 4;
+    const GRC_TRAVEL_PURPOSE_OF_VISIT     = 5;
+
+    // Guest Registration Card — Booking Information fields (section 3)
+    const GRC_BOOKING_REFERENCE           = 1;
+    const GRC_BOOKING_RATE_PER_NIGHT      = 2;
+    const GRC_BOOKING_ARRIVAL             = 3;
+    const GRC_BOOKING_DEPARTURE           = 4;
+    const GRC_BOOKING_ROOM_TYPE           = 5;
+    const GRC_BOOKING_ROOM_NUMBER         = 6;
+    const GRC_BOOKING_NUM_GUESTS          = 7;
+
+    // Guest Registration Card — Identification Document fields (section 4)
+    const GRC_ID_IDENTITY_PROOF           = 1;
+    const GRC_ID_NUMBER                   = 2;
+    const GRC_ID_PASSPORT_NO              = 3;
+    const GRC_ID_PLACE_OF_ISSUE           = 4;
+    const GRC_ID_DATE_OF_ISSUE            = 5;
+    const GRC_ID_DATE_OF_EXPIRY           = 6;
+    const GRC_ID_VISA_NUMBER              = 7;
+    const GRC_ID_VALID_UNTIL              = 8;
+    const GRC_ID_ARRIVAL_DATE_IN_COUNTRY  = 9;
+
+    // Guest Registration Card — Additional Guests fields (section 5)
+    const GRC_ADD_GUEST_NAME              = 1;
+    const GRC_ADD_GUEST_ID_TYPE           = 2;
+    const GRC_ADD_GUEST_ID_NUMBER         = 3;
+    const GRC_ADD_GUEST_NATIONALITY       = 4;
+
+    // Guest Registration Card — Billing & Corporate Details fields (section 6)
+    const GRC_BILLING_COMPANY             = 1;
+    const GRC_BILLING_TAX_ID              = 2;
+
+    // Guest Registration Card — Payment & Deposit fields (section 7)
+    const GRC_PAYMENT_METHOD              = 1;
+    const GRC_PAYMENT_CARD_NUMBER         = 2;
+    const GRC_PAYMENT_SECURITY_DEPOSIT    = 3;
+
+    // Guest Registration Card — Guest Signature fields (section 8)
+    const GRC_SIG_SIGNATURE               = 1;
+    const GRC_SIG_DATE                    = 2;
+
+    // Guest Registration Card — Property Regulations fields (section 9)
+    const GRC_PROP_CHECKIN_CHECKOUT_TIME  = 1;
+    const GRC_PROP_HOTEL_POLICIES         = 2;
+
+    // Guest Registration Card — For Office Use Only fields (section 10)
+    const GRC_OFFICE_STAFF_NAME           = 1;
+    const GRC_OFFICE_CHECKIN_TIME         = 2;
+    const GRC_OFFICE_ID_VERIFIED          = 3;
+    const GRC_OFFICE_REG_NO               = 4;
+
     /** @var int Delivery address id */
     public $id_address_delivery;
 
@@ -2417,6 +2496,121 @@ class OrderCore extends ObjectModel
         return ($a->date_add < $b->date_add) ? -1 : 1;
     }
 
+    /**
+     * Returns all Guest Registration Card sections and their fields.
+     * Modules may add, remove, or reorder sections/fields via the hook.
+     *
+     * @return array  sectionId => ['name' => string, 'fields' => [fieldId => string, ...]]
+     */
+    public static function getRegistrationCardInfo()
+    {
+        $guestRegCardInfo = array(
+            self::GRC_SECTION_GUEST_INFO => array(
+                'name'   => self::l('Guest Information'),
+                'fields' => array(
+                    self::GRC_GUEST_TITLE        => self::l('Title'),
+                    self::GRC_GUEST_FULL_NAME    => self::l('Full Name (As per ID)'),
+                    self::GRC_GUEST_PHONE        => self::l('Phone / Mobile'),
+                    self::GRC_GUEST_EMAIL        => self::l('Email'),
+                    self::GRC_GUEST_DOB          => self::l('Date of Birth'),
+                    self::GRC_GUEST_NATIONALITY  => self::l('Nationality'),
+                    self::GRC_GUEST_CITY_COUNTRY => self::l('City / Country'),
+                    self::GRC_GUEST_POSTAL_CODE  => self::l('Postal Code'),
+                    self::GRC_GUEST_ADDRESS      => self::l('Address'),
+                ),
+            ),
+            self::GRC_SECTION_TRAVEL_INFO => array(
+                'name'   => self::l('Travel Information'),
+                'fields' => array(
+                    self::GRC_TRAVEL_ARRIVED_FROM     => self::l('Arrived From'),
+                    self::GRC_TRAVEL_NEXT_DESTINATION => self::l('Next Destination'),
+                    self::GRC_TRAVEL_FLIGHT_TRAIN     => self::l('Flight / Train Number'),
+                    self::GRC_TRAVEL_VEHICLE_REG      => self::l('Vehicle Reg. No.'),
+                    self::GRC_TRAVEL_PURPOSE_OF_VISIT => self::l('Purpose of Visit'),
+                ),
+            ),
+            self::GRC_SECTION_BOOKING_INFO => array(
+                'name'   => self::l('Booking Information'),
+                'fields' => array(
+                    self::GRC_BOOKING_REFERENCE      => self::l('Booking Reference No.'),
+                    self::GRC_BOOKING_RATE_PER_NIGHT => self::l('Rate per Night'),
+                    self::GRC_BOOKING_ARRIVAL        => self::l('Arrival Date & Time'),
+                    self::GRC_BOOKING_DEPARTURE      => self::l('Departure Date & Time'),
+                    self::GRC_BOOKING_ROOM_TYPE      => self::l('Room Type'),
+                    self::GRC_BOOKING_ROOM_NUMBER    => self::l('Room Number'),
+                    self::GRC_BOOKING_NUM_GUESTS     => self::l('Number of Guests'),
+                ),
+            ),
+            self::GRC_SECTION_IDENTIFICATION => array(
+                'name'   => self::l('Identification Document'),
+                'fields' => array(
+                    self::GRC_ID_IDENTITY_PROOF          => self::l('Identity Proof'),
+                    self::GRC_ID_NUMBER                  => self::l('ID Number'),
+                    self::GRC_ID_PASSPORT_NO             => self::l('Passport No.'),
+                    self::GRC_ID_PLACE_OF_ISSUE          => self::l('Place of Issue'),
+                    self::GRC_ID_DATE_OF_ISSUE           => self::l('Date of Issue'),
+                    self::GRC_ID_DATE_OF_EXPIRY          => self::l('Date of Expiry'),
+                    self::GRC_ID_VISA_NUMBER             => self::l('Visa Number'),
+                    self::GRC_ID_VALID_UNTIL             => self::l('Valid Until'),
+                    self::GRC_ID_ARRIVAL_DATE_IN_COUNTRY => self::l('Arrival Date in Country'),
+                ),
+            ),
+            self::GRC_SECTION_ADDITIONAL_GUESTS => array(
+                'name'   => self::l('Additional Guests'),
+                'fields' => array(
+                    self::GRC_ADD_GUEST_NAME        => self::l('Guest Name'),
+                    self::GRC_ADD_GUEST_ID_TYPE     => self::l('ID Type'),
+                    self::GRC_ADD_GUEST_ID_NUMBER   => self::l('ID Number'),
+                    self::GRC_ADD_GUEST_NATIONALITY => self::l('Nationality'),
+                ),
+            ),
+            self::GRC_SECTION_BILLING_CORPORATE => array(
+                'name'   => self::l('Billing & Corporate Details'),
+                'fields' => array(
+                    self::GRC_BILLING_COMPANY => self::l('Company / Agent'),
+                    self::GRC_BILLING_TAX_ID  => self::l('Tax ID / VAT No.'),
+                ),
+            ),
+            self::GRC_SECTION_PAYMENT_DEPOSIT => array(
+                'name'   => self::l('Payment & Deposit'),
+                'fields' => array(
+                    self::GRC_PAYMENT_METHOD           => self::l('Payment Method'),
+                    self::GRC_PAYMENT_CARD_NUMBER      => self::l('Credit Card Number'),
+                    self::GRC_PAYMENT_SECURITY_DEPOSIT => self::l('Security Deposit'),
+                ),
+            ),
+            self::GRC_SECTION_GUEST_SIGNATURE => array(
+                'name'   => self::l('Guest Signature'),
+                'fields' => array(
+                    self::GRC_SIG_SIGNATURE => self::l('Signature'),
+                    self::GRC_SIG_DATE      => self::l('Date'),
+                ),
+            ),
+            self::GRC_SECTION_PROPERTY_REGS => array(
+                'name'   => self::l('Property Regulations'),
+                'fields' => array(
+                    self::GRC_PROP_CHECKIN_CHECKOUT_TIME => self::l('Check-in / Check-out Time'),
+                    self::GRC_PROP_HOTEL_POLICIES        => self::l('Hotel Policies'),
+                ),
+            ),
+            self::GRC_SECTION_OFFICE_USE_ONLY => array(
+                'name'   => self::l('For Office Use Only'),
+                'fields' => array(
+                    self::GRC_OFFICE_STAFF_NAME   => self::l('Staff Name'),
+                    self::GRC_OFFICE_CHECKIN_TIME => self::l('Check-in Time'),
+                    self::GRC_OFFICE_ID_VERIFIED  => self::l('ID Verified'),
+                    self::GRC_OFFICE_REG_NO       => self::l('Registration No.'),
+                ),
+            ),
+        );
+
+        Hook::exec('actionGuestRegCardInfoModifier', array(
+            'guest_registration_info' => &$guestRegCardInfo,
+        ));
+
+        return $guestRegCardInfo;
+    }
+
     public function getWsShippingNumber()
     {
         $id_order_carrier = Db::getInstance()->getValue('
@@ -3159,6 +3353,475 @@ class OrderCore extends ObjectModel
         return $totalOrder;
     }
 
+    /**
+     * Returns total purchase cost (supplier prices) for orders in the given date range.
+     * Replicates: AdminStatsController::getPurchases()
+     *
+     * @param array $params date_from, date_to, id_hotel, id_order, id_customer, granularity ('day'|'month'|false)
+     * @return float|array
+     */
+    public static function getTotalPurchases(array $params)
+    {
+        $dateFrom    = pSQL($params['date_from']);
+        $dateTo      = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel     = isset($params['id_hotel'])     ? $params['id_hotel']           : false;
+        $idOrder     = isset($params['id_order'])     ? (int) $params['id_order']    : 0;
+        $idCustomer  = isset($params['id_customer'])  ? (int) $params['id_customer'] : 0;
+        $margin      = (int) Configuration::get('CONF_AVERAGE_PRODUCT_MARGIN');
+        $granularity = isset($params['granularity'])  ? $params['granularity']       : false;
+
+        if ($granularity === 'day' || $granularity === 'month') {
+            $groupLen = $granularity === 'month' ? 7 : 10;
+            $tsSuffix = $granularity === 'month' ? '-01' : '';
+            $rows = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
+                'SELECT LEFT(o.`invoice_date`, '.$groupLen.') AS grp,
+                        SUM(od.`product_quantity` * IF(
+                            od.`purchase_supplier_price` > 0,
+                            od.`purchase_supplier_price`,
+                            (od.`original_product_price` / o.`conversion_rate`) * '.$margin.' / 100
+                        )) AS amt
+                FROM `'._DB_PREFIX_.'orders` o
+                LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON (od.`id_order` = o.`id_order`)
+                LEFT JOIN `'._DB_PREFIX_.'order_state` os ON (os.`id_order_state` = o.`current_state`)
+                WHERE o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"
+                AND os.`logable` = 1'
+                .($idOrder    ? ' AND o.`id_order` = '.$idOrder       : '')
+                .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '').'
+                AND (
+                    EXISTS (
+                        SELECT 1
+                        FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                        WHERE hbd.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                    ) OR EXISTS (
+                        SELECT 1
+                        FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                        WHERE spod.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'spod').'
+                    )'.(!$idHotel ? ' OR EXISTS (
+                        SELECT 1
+                        FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                        WHERE spod.`id_order` = o.`id_order` AND spod.`id_hotel` = 0 AND spod.`id_htl_booking_detail` = 0
+                    )' : '').'
+                )
+                GROUP BY LEFT(o.`invoice_date`, '.$groupLen.')'
+            );
+            $result = array();
+            foreach ($rows as $row) {
+                $result[strtotime($row['grp'].$tsSuffix)] = (float) $row['amt'];
+            }
+            return $result;
+        }
+
+        return (float) Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            'SELECT SUM(od.`product_quantity` * IF(
+                od.`purchase_supplier_price` > 0,
+                od.`purchase_supplier_price`,
+                (od.`original_product_price` / o.`conversion_rate`) * '.$margin.' / 100
+            ))
+            FROM `'._DB_PREFIX_.'orders` o
+            LEFT JOIN `'._DB_PREFIX_.'order_detail` od ON (od.`id_order` = o.`id_order`)
+            LEFT JOIN `'._DB_PREFIX_.'order_state` os ON (os.`id_order_state` = o.`current_state`)
+            WHERE o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"
+            AND os.`logable` = 1'
+            .($idOrder    ? ' AND o.`id_order` = '.$idOrder       : '')
+            .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '').'
+            AND (
+                EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                    WHERE hbd.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                ) OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'spod').'
+                )'.(!$idHotel ? ' OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order` AND spod.`id_hotel` = 0 AND spod.`id_htl_booking_detail` = 0
+                )' : '').'
+            )'
+        );
+    }
+
+    /**
+     * Returns total payment gateway expenses for orders in the given date range.
+     * Replicates: AdminStatsController::getExpenses()
+     *
+     * @param array $params date_from, date_to, id_hotel, id_order, id_customer, granularity ('day'|'month'|false)
+     * @return float|array
+     */
+    public static function getExpenses(array $params)
+    {
+        $dateFrom    = pSQL($params['date_from']);
+        $dateTo      = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel     = isset($params['id_hotel'])     ? $params['id_hotel']           : false;
+        $idOrder     = isset($params['id_order'])     ? (int) $params['id_order']    : 0;
+        $idCustomer  = isset($params['id_customer'])  ? (int) $params['id_customer'] : 0;
+        $granularity = isset($params['granularity'])  ? $params['granularity']       : false;
+        $groupLen    = $granularity === 'month' ? 7 : 10;
+        $tsSuffix    = $granularity === 'month' ? '-01' : '';
+
+        $orders = Db::getInstance()->executeS(
+            'SELECT
+                o.`id_order`,
+                o.`id_currency`,
+                o.`module`,
+                o.`total_paid_tax_incl` / o.`conversion_rate` AS total_paid_tax_incl,
+                LEFT(o.`invoice_date`, '.$groupLen.') AS grp_date
+            FROM `'._DB_PREFIX_.'orders` o
+            LEFT JOIN `'._DB_PREFIX_.'order_state` os ON (os.`id_order_state` = o.`current_state`)
+            WHERE o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"
+            AND os.`logable` = 1'
+            .($idOrder    ? ' AND o.`id_order` = '.$idOrder       : '')
+            .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '').'
+            AND (
+                EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                    WHERE hbd.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                ) OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'spod').'
+                )'.(!$idHotel ? ' OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order` AND spod.`id_hotel` = 0 AND spod.`id_htl_booking_detail` = 0
+                )' : '').'
+            )'
+        );
+
+        $defaultCurrency = (int) Configuration::get('PS_CURRENCY_DEFAULT');
+        $total           = 0;
+        $byPeriod        = array();
+
+        foreach ($orders as $order) {
+            $module  = strtoupper($order['module']);
+            $sameCur = ((int) $order['id_currency'] === $defaultCurrency);
+            $flatFee = (float) Configuration::get('CONF_ORDER_FIXED')
+                + (float) Configuration::get('CONF_'.$module.($sameCur ? '_FIXED' : '_FIXED_FOREIGN'));
+            $varFee  = (float) $order['total_paid_tax_incl']
+                * (float) Configuration::get('CONF_'.$module.($sameCur ? '_VAR' : '_VAR_FOREIGN'))
+                / 100;
+            $fee = $flatFee + $varFee;
+            $total += $fee;
+            if ($granularity) {
+                $ts = strtotime($order['grp_date'].$tsSuffix);
+                $byPeriod[$ts] = (isset($byPeriod[$ts]) ? $byPeriod[$ts] : 0) + $fee;
+            }
+        }
+
+        return $granularity ? $byPeriod : $total;
+    }
+
+    /**
+     * Returns total refunded amount for orders in the given date range.
+     * Replicates: AdminStatsController::getRefunds()
+     *
+     * @param array $params date_from, date_to, id_hotel, id_order, id_customer, granularity ('day'|'month'|false)
+     * @return float|array
+     */
+    public static function getTotalRefund(array $params)
+    {
+        $dateFrom    = pSQL($params['date_from']);
+        $dateTo      = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel     = isset($params['id_hotel'])     ? $params['id_hotel']           : false;
+        $idOrder     = isset($params['id_order'])     ? (int) $params['id_order']    : 0;
+        $idCustomer  = isset($params['id_customer'])  ? (int) $params['id_customer'] : 0;
+        $granularity = isset($params['granularity'])  ? $params['granularity']       : false;
+
+        if ($granularity === 'day' || $granularity === 'month') {
+            $groupLen = $granularity === 'month' ? 7 : 10;
+            $tsSuffix = $granularity === 'month' ? '-01' : '';
+            $rows = Db::getInstance(_PS_USE_SQL_SLAVE_)->executeS(
+                'SELECT LEFT(o.`invoice_date`, '.$groupLen.') AS grp,
+                        IFNULL(SUM(orr.`refunded_amount`), 0) AS amt
+                FROM `'._DB_PREFIX_.'orders` o
+                LEFT JOIN `'._DB_PREFIX_.'order_return` orr ON (orr.`id_order` = o.`id_order`)
+                LEFT JOIN `'._DB_PREFIX_.'order_state` os ON (os.`id_order_state` = o.`current_state`)
+                WHERE orr.`payment_mode` != ""
+                AND orr.`id_transaction` != ""
+                AND o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"'
+                .($idOrder    ? ' AND o.`id_order` = '.$idOrder       : '')
+                .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '').'
+                AND (
+                    EXISTS (
+                        SELECT 1
+                        FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                        WHERE hbd.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                    ) OR EXISTS (
+                        SELECT 1
+                        FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                        WHERE spod.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'spod').'
+                    )'.(!$idHotel ? ' OR EXISTS (
+                        SELECT 1
+                        FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                        WHERE spod.`id_order` = o.`id_order` AND spod.`id_hotel` = 0 AND spod.`id_htl_booking_detail` = 0
+                    )' : '').'
+                )
+                GROUP BY LEFT(o.`invoice_date`, '.$groupLen.')'
+            );
+            $result = array();
+            foreach ($rows as $row) {
+                $result[strtotime($row['grp'].$tsSuffix)] = (float) $row['amt'];
+            }
+            return $result;
+        }
+
+        return (float) Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            'SELECT IFNULL(SUM(orr.`refunded_amount`), 0)
+            FROM `'._DB_PREFIX_.'orders` o
+            LEFT JOIN `'._DB_PREFIX_.'order_return` orr ON (orr.`id_order` = o.`id_order`)
+            LEFT JOIN `'._DB_PREFIX_.'order_state` os ON (os.`id_order_state` = o.`current_state`)
+            WHERE orr.`payment_mode` != ""
+            AND orr.`id_transaction` != ""
+            AND o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"'
+            .($idOrder    ? ' AND o.`id_order` = '.$idOrder       : '')
+            .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '').'
+            AND (
+                EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                    WHERE hbd.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                ) OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'spod').'
+                )'.(!$idHotel ? ' OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order` AND spod.`id_hotel` = 0 AND spod.`id_htl_booking_detail` = 0
+                )' : '').'
+            )'
+        );
+    }
+
+    /**
+     * Returns total amount due (total_paid_tax_incl - total_paid_real) across orders.
+     * Used to compute outstanding balances.
+     *
+     * @param array $params date_from, date_to, id_hotel, id_order, id_customer
+     * @return float
+     */
+    public static function getTotalDueAmount(array $params)
+    {
+        $dateFrom   = pSQL($params['date_from']);
+        $dateTo     = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel    = isset($params['id_hotel'])    ? $params['id_hotel']           : false;
+        $idOrder    = isset($params['id_order'])    ? (int) $params['id_order']    : 0;
+        $idCustomer = isset($params['id_customer']) ? (int) $params['id_customer'] : 0;
+
+        $objHotelBooking     = new HotelBookingDetail();
+        $invalidOrderStates  = $objHotelBooking->getOrderStatusToFreeBookedRoom();
+
+        return (float) Db::getInstance(_PS_USE_SQL_SLAVE_)->getValue(
+            'SELECT IFNULL(SUM(
+                IF(
+                    (o.`total_paid_tax_incl` / o.`conversion_rate`) - (o.`total_paid_real` / o.`conversion_rate`) > 0,
+                    (o.`total_paid_tax_incl` / o.`conversion_rate`) - (o.`total_paid_real` / o.`conversion_rate`),
+                    0
+                )
+            ), 0)
+            FROM `'._DB_PREFIX_.'orders` o
+            WHERE o.`date_add` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"'
+            .($invalidOrderStates ? ' AND o.`current_state` NOT IN ('.implode(',', array_map('intval', $invalidOrderStates)).')' : '')
+            .($idOrder    ? ' AND o.`id_order` = '.$idOrder       : '')
+            .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '').'
+            AND (
+                EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                    WHERE hbd.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                ) OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order`'.HotelBranchInformation::addHotelRestriction($idHotel, 'spod').'
+                )'.(!$idHotel ? ' OR EXISTS (
+                    SELECT 1
+                    FROM `'._DB_PREFIX_.'service_product_order_detail` spod
+                    WHERE spod.`id_order` = o.`id_order` AND spod.`id_hotel` = 0 AND spod.`id_htl_booking_detail` = 0
+                )' : '').'
+            )'
+        );
+    }
+
+    /**
+     * Recent orders for a hotel, with order state name and colour.
+     *
+     * Replaces: AdminStatsController::getRecentOrdersByHotel()
+     *
+     * @param array $params id_hotel, limit, id_lang
+     * @return array
+     */
+    public static function getRecentOrdersByHotel(array $params)
+    {
+        $idHotel = isset($params['id_hotel']) ? $params['id_hotel'] : false;
+        $limit   = isset($params['limit'])    ? (int) $params['limit'] : 0;
+        $idLang  = isset($params['id_lang'])  ? (int) $params['id_lang'] : 0;
+        if (!$idLang) {
+            $idLang = Context::getContext()->language->id;
+        }
+
+        return Db::getInstance()->executeS(
+            'SELECT o.*, osl.`name` AS `state_name`, os.`color` AS `state_color`,
+                    o.`date_add` AS `date_add`, o.`date_upd` AS `date_upd`
+            FROM `'._DB_PREFIX_.'orders` o
+            LEFT JOIN `'._DB_PREFIX_.'order_state` os ON (os.`id_order_state` = o.`current_state`)
+            LEFT JOIN `'._DB_PREFIX_.'order_state_lang` osl
+                ON (osl.`id_order_state` = o.`current_state` AND osl.`id_lang` = '.(int) $idLang.')
+            LEFT JOIN `'._DB_PREFIX_.'customer` c ON (c.`id_customer` = o.`id_customer`)
+            LEFT JOIN `'._DB_PREFIX_.'htl_booking_detail` hbd ON (hbd.`id_order` = o.`id_order`)
+            WHERE 1'
+            .HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+            GROUP BY o.`id_order`
+            ORDER BY o.`date_add` DESC'
+            .($limit ? ' LIMIT 0, '.(int) $limit : '')
+        );
+    }
+
+    /**
+     * Orders with unpaid balance: invoice total exceeds payments actually collected.
+     * Filters to hotel orders within the invoice date range.
+     *
+     * @param array $params  date_from, date_to, id_hotel, id_product
+     * @return array  rows: id_order, reference, customer_name, hotel_name, room_type_name,
+     *                      room_num, date_from, date_to, total_paid_tax_incl,
+     *                      total_collected, balance_due
+     */
+    public static function getOutstandingBalance(array $params)
+    {
+        $dateFrom  = pSQL($params['date_from']);
+        $dateTo    = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel   = isset($params['id_hotel'])   ? $params['id_hotel']          : false;
+        $idProduct = isset($params['id_product']) ? (int) $params['id_product'] : 0;
+        $idStatus  = isset($params['id_status'])  ? (int) $params['id_status']  : 0;
+
+        return Db::getInstance()->executeS(
+            'SELECT o.`id_order`, o.`reference`,
+            CONCAT(c.`firstname`, " ", c.`lastname`) AS customer_name,
+            c.`email`, a.`phone`,
+            hbd.`room_type_name`, hbd.`room_num`,
+            hbd.`date_from`, hbd.`date_to`, hbd.`id_status`,
+            o.`total_paid_tax_incl` / o.`conversion_rate` AS total_charges,
+            IFNULL(SUM(op.`amount`), 0) / o.`conversion_rate` AS total_paid,
+            (o.`total_paid_tax_incl` - IFNULL(SUM(op.`amount`), 0)) / o.`conversion_rate` AS balance_due,
+            GREATEST(0, DATEDIFF(CURDATE(), hbd.`date_to`)) AS days_overdue,
+            MAX(op.`date_add`) AS last_payment_date
+            FROM `'._DB_PREFIX_.'orders` o
+            INNER JOIN `'._DB_PREFIX_.'customer` c ON (c.`id_customer` = o.`id_customer`)
+            INNER JOIN `'._DB_PREFIX_.'htl_booking_detail` hbd
+                ON (hbd.`id_order` = o.`id_order` AND hbd.`is_cancelled` = 0 AND hbd.`is_refunded` = 0)
+            INNER JOIN `'._DB_PREFIX_.'product` p ON (p.`id_product` = hbd.`id_product` AND p.`active` = 1 AND p.`booking_product` = 1)
+            LEFT JOIN `'._DB_PREFIX_.'address` a ON (a.`id_address` = o.`id_address_invoice`)
+            LEFT JOIN `'._DB_PREFIX_.'order_payment` op ON (op.`order_reference` = o.`reference`)
+            WHERE o.`valid` = 1
+            AND o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"'
+            .($idProduct ? ' AND hbd.`id_product` = '.$idProduct : '')
+            .($idStatus  ? ' AND hbd.`id_status` = '.$idStatus   : '')
+            .HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+            GROUP BY o.`id_order`
+            HAVING balance_due > 0.01
+            ORDER BY balance_due DESC'
+        );
+    }
+
+    /**
+     * Total order-level discounts (vouchers) applied to hotel orders in the date range.
+     * Filters to orders that contain a hotel booking via EXISTS subquery.
+     * Returns a positive number representing the discount amount.
+     *
+     * $params: date_from, date_to, id_hotel, id_customer, granularity ('day'|false)
+     *
+     * @param array $params
+     * @return float|array  scalar when no granularity, timestamp => float when granularity='day'
+     */
+    public static function getTotalDiscounts(array $params)
+    {
+        $dateFrom    = pSQL($params['date_from']);
+        $dateTo      = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel     = isset($params['id_hotel'])     ? $params['id_hotel']           : false;
+        $idCustomer  = isset($params['id_customer'])  ? (int) $params['id_customer'] : 0;
+        $granularity = isset($params['granularity'])  ? $params['granularity']       : false;
+
+        $hotelExists = ' AND EXISTS (
+            SELECT 1 FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+            WHERE hbd.`id_order` = o.`id_order`'
+            .HotelBranchInformation::addHotelRestriction($idHotel, 'hbd')
+            .')';
+
+        if ($granularity === 'day') {
+            $rows = Db::getInstance()->executeS(
+                'SELECT LEFT(o.`invoice_date`, 10) AS grp,
+                IFNULL(SUM(o.`total_discounts_tax_excl` / o.`conversion_rate`), 0) AS amt
+                FROM `'._DB_PREFIX_.'orders` o
+                WHERE o.`valid` = 1
+                AND o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"'
+                .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '')
+                .$hotelExists.'
+                GROUP BY LEFT(o.`invoice_date`, 10)'
+            );
+            $result = array();
+            foreach ($rows as $row) {
+                $result[strtotime($row['grp'])] = (float) $row['amt'];
+            }
+            return $result;
+        }
+
+        return (float) Db::getInstance()->getValue(
+            'SELECT IFNULL(SUM(o.`total_discounts_tax_excl` / o.`conversion_rate`), 0)
+            FROM `'._DB_PREFIX_.'orders` o
+            WHERE o.`valid` = 1
+            AND o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"'
+            .($idCustomer ? ' AND o.`id_customer` = '.$idCustomer : '')
+            .$hotelExists
+        );
+    }
+
+    /**
+     * Percentage of revenue from the direct channel (PS_SHOP_DOMAIN).
+     * Computes net revenue per order (paid minus refunds), then returns direct_revenue / total_revenue * 100.
+     *
+     * @param array $params  date_from, date_to, id_hotel
+     * @return float  0–100
+     */
+    public static function getDirectRevenueRatio(array $params)
+    {
+        $dateFrom = pSQL($params['date_from']);
+        $dateTo   = pSQL(isset($params['date_to']) ? $params['date_to'] : $params['date_from']);
+        $idHotel  = isset($params['id_hotel']) ? $params['id_hotel'] : false;
+
+        if ($params['date_from'] === (isset($params['date_to']) ? $params['date_to'] : $params['date_from'])) {
+            $dateTo = pSQL(date('Y-m-d', strtotime('+1 day', strtotime($params['date_from']))));
+        }
+
+        $row = Db::getInstance()->getRow(
+            'SELECT
+                IFNULL(SUM(net_rev), 0) AS total_revenue,
+                IFNULL(SUM(IF(is_direct, net_rev, 0)), 0) AS direct_revenue
+            FROM (
+                SELECT
+                    (o.`total_paid_tax_excl` / o.`conversion_rate`)
+                    - IFNULL((
+                        SELECT SUM(orr.`refunded_amount`)
+                        FROM `'._DB_PREFIX_.'order_return` orr
+                        WHERE orr.`id_order` = o.`id_order`
+                    ), 0) AS net_rev,
+                    (o.`source` = "'.pSQL(Configuration::get('PS_SHOP_DOMAIN')).'") AS is_direct
+                FROM `'._DB_PREFIX_.'orders` o
+                WHERE o.`valid` = 1
+                AND o.`invoice_date` BETWEEN "'.$dateFrom.' 00:00:00" AND "'.$dateTo.' 23:59:59"
+                AND EXISTS (
+                    SELECT 1 FROM `'._DB_PREFIX_.'htl_booking_detail` hbd
+                    WHERE hbd.`id_order` = o.`id_order`'
+                    .HotelBranchInformation::addHotelRestriction($idHotel, 'hbd').'
+                )
+            ) AS t'
+        );
+
+        $totalRevenue  = $row ? (float) $row['total_revenue']  : 0;
+        $directRevenue = $row ? (float) $row['direct_revenue'] : 0;
+
+        return $totalRevenue ? (($directRevenue / $totalRevenue) * 100) : 0;
+    }
     public function getPaymentsTypes()
     {
         $module = Module::getInstanceByName('hotelreservationsystem');

@@ -236,7 +236,7 @@ class DashGuestCycle extends Module
             unset($header['hotel']);
         }
 
-        $arrivalsInfo = AdminStatsController::getArrivalsInfoByDate($date, $idHotel);
+        $arrivalsInfo = HotelBookingDetail::getArrivalsInfo(['date_from' => $date, 'id_hotel' => $idHotel]);
 
         $body = array();
         foreach ($arrivalsInfo as $arrivalInfo) {
@@ -296,7 +296,7 @@ class DashGuestCycle extends Module
             unset($header['hotel']);
         }
 
-        $departuresInfo = AdminStatsController::getDeparturesInfoByDate($date, $idHotel);
+        $departuresInfo = HotelBookingDetail::getDeparturesInfo(['date_from' => $date, 'id_hotel' => $idHotel]);
 
         $body = array();
         foreach ($departuresInfo as $departureInfo) {
@@ -357,7 +357,7 @@ class DashGuestCycle extends Module
             unset($header['hotel']);
         }
 
-        $inHousesInfo = AdminStatsController::getInHousesInfo($idHotel);
+        $inHousesInfo = HotelBookingDetail::getInHouseInfo(['id_hotel' => $idHotel]);
 
         $body = array();
         foreach ($inHousesInfo as $inHouseInfo) {
@@ -421,7 +421,7 @@ class DashGuestCycle extends Module
             unset($header['hotel']);
         }
 
-        $newBookingsInfo = AdminStatsController::getNewBookingsInfoByDate($date, $idHotel);
+        $newBookingsInfo = HotelBookingDetail::getBookings(['date_from' => $date, 'id_hotel' => $idHotel]);
 
         $body = array();
         foreach ($newBookingsInfo as $newBookingInfo) {
@@ -485,7 +485,7 @@ class DashGuestCycle extends Module
             unset($header['hotel']);
         }
 
-        $cancellationsInfo = AdminStatsController::getCancellationsInfoByDate($date, $idHotel);
+        $cancellationsInfo = HotelBookingDetail::getCancellations(array('date_from' => $date, 'id_hotel' => $idHotel));
 
         $body = array();
         foreach ($cancellationsInfo as $cancellationInfo) {
