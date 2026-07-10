@@ -332,6 +332,9 @@ class AdminTranslationsControllerCore extends AdminController
             case 'pdf':
                 $to_insert = $GLOBALS['_LANGPDF'];
                 break;
+            case 'class':
+                $to_insert = $GLOBALS['_LANGCLASS'];
+                break;
 
         }
         foreach ($to_insert as $key => $value) {
@@ -1229,6 +1232,20 @@ class AdminTranslationsControllerCore extends AdminController
                 $directories['php'] = Translate::listFiles(_PS_CLASS_DIR_, array(), 'php');
                 break;
 
+            case 'class':
+            $directories['php'] = Translate::listFiles(_PS_CLASS_DIR_, array(), 'php');
+            $directories['php'] = array_merge($directories['php'], Translate::listFiles(_PS_OVERRIDE_DIR_.'classes/', array(), 'php'));
+            // Remove classes/pdf/ and classes/helper/ — those subdirs have dedicated translation
+            // types (pdf and back) that write to pdf.php and admin.php respectively.
+            // self::l() there resolves to HTMLTemplate::l() / Helper::l(), not ObjectModel::l().
+            foreach (array_keys($directories['php']) as $dir) {
+                if (strpos($dir, DIRECTORY_SEPARATOR.'pdf'.DIRECTORY_SEPARATOR) !== false
+                    || strpos($dir, DIRECTORY_SEPARATOR.'helper'.DIRECTORY_SEPARATOR) !== false) {
+                    unset($directories['php'][$dir]);
+                }
+            }
+            break;
+
             case 'pdf':
                 $tpl_theme = Tools::file_exists_cache(_PS_THEME_SELECTED_DIR_.'pdf/') ? scandir(_PS_THEME_SELECTED_DIR_.'pdf/') : array();
                 $directories = array(
@@ -1480,7 +1497,7 @@ class AdminTranslationsControllerCore extends AdminController
                 } else {
                     $this->errors[] = Tools::displayError('You do not have permission to edit this.');
                 }
-            } elseif (Tools::isSubmit('submitTranslationsBack') || Tools::isSubmit('submitTranslationsErrors') || Tools::isSubmit('submitTranslationsFields') || Tools::isSubmit('submitTranslationsFront')) {
+            } elseif (Tools::isSubmit('submitTranslationsBack') || Tools::isSubmit('submitTranslationsErrors') || Tools::isSubmit('submitTranslationsFields') || Tools::isSubmit('submitTranslationsFront') || Tools::isSubmit('submitTranslationsClass')) {
                 if ($this->tabAccess['edit'] === 1) {
                     $this->writeTranslationFile();
                 } else {
