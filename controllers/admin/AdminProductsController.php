@@ -5657,7 +5657,6 @@ class AdminProductsControllerCore extends AdminController
 
         return $tpl->fetch();
     }
-<<<<<<< HEAD
 
     public function ajaxProcessGetNotConnectedRooms()
     {
@@ -5755,8 +5754,4 @@ class AdminProductsControllerCore extends AdminController
             die(json_encode(['success' => false, 'message' => $this->l('Failed to remove connected room.')]));
         }
     }
-
 }
-=======
-}
->>>>>>> gli-3018
